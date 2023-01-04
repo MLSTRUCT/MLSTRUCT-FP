@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - Slab Component
+MLSTRUCTFP - DB - CSLAB
 
-Provides basic definition to work with slabs.
+Slab component.
 """

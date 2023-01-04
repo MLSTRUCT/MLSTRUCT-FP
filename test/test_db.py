@@ -1,14 +1,14 @@
 """
-MLSTRUCTFP - DbLoader - TEST
+MLSTRUCTFP - TEST - DB
 
-Test the database loader.
+Test the database loader and object components (rect, slab, floor).
 """
 
 import os
 import unittest
-
 from pathlib import Path
-from mlstructfp import DbLoader
+
+from mlstructfp.db import DbLoader
 
 
 class DbLoaderTest(unittest.TestCase):
@@ -19,4 +19,3 @@ class DbLoaderTest(unittest.TestCase):
         """
         db = DbLoader('../db/database.json')
         self.assertEqual(os.path.join(Path(os.getcwd()).parent, 'db'), db._path)
-        # print(db._data)

@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DbLoader
+MLSTRUCTFP - DB - DBLOADER
 
 Loads a given database.json file.
 """
