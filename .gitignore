@@ -1,0 +1,10 @@
+# IDEs
+.idea
+
+# DB
+db/
+
+# Other
+.old
+_dev_*
+~$*
