@@ -2,9 +2,10 @@
 .idea
 
 # DB
-db/
+database/
 
 # Other
-.old
+__pycache__
 _dev_*
+.old
 ~$*
