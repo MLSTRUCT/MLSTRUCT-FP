@@ -17,5 +17,5 @@ class DbLoaderTest(unittest.TestCase):
         """
         Test db loader path and number of database items.
         """
-        db = DbLoader('../db/database.json')
-        self.assertEqual(os.path.join(Path(os.getcwd()).parent, 'db'), db._path)
+        db = DbLoader('data/fp.json')
+        self.assertEqual(os.path.join(Path(os.getcwd()), 'data'), db._path)
