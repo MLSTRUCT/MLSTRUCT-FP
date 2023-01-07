@@ -6,25 +6,29 @@ Floor component, container of slabs and rectangles.
 
 __all__ = ['Floor']
 
+from MLStructFP.utils import GeomPoint2D
+
 import os
 import plotly.graph_objects as go
 
-from typing import Dict, TYPE_CHECKING
+from typing import Dict, Tuple, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from MLStructFP.db._crect import Rect
-    from MLStructFP.db._cslab import Slab
+    from MLStructFP.db._c import BaseComponent
+    from MLStructFP.db._c_rect import Rect
+    from MLStructFP.db._c_slab import Slab
 
 
 class Floor(object):
     """
     FP Floor.
     """
+    _last_mutation: Optional[Dict[str, float]]
+    _rect: Dict[int, 'Rect']  # id => rect
+    _slab: Dict[int, 'Slab']  # id => slab
     id: int
     image_path: str
     image_scale: float
-    rect: Dict[int, 'Rect']  # id => rect
-    slab: Dict[int, 'Slab']  # id => slab
 
     def __init__(self, floor_id: int, image_path: str, image_scale: float) -> None:
         """
@@ -40,8 +44,17 @@ class Floor(object):
         self.id = floor_id
         self.image_path = image_path
         self.image_scale = float(image_scale)
-        self.rect = {}
-        self.slab = {}
+        self._last_mutation = None
+        self._rect = {}
+        self._slab = {}
+
+    @property
+    def rect(self) -> Tuple['Rect']:
+        return tuple(self._rect.values())
+
+    @property
+    def slab(self) -> Tuple['Slab']:
+        return tuple(self._slab.values())
 
     def plot_basic(self) -> 'go.Figure':
         """
@@ -69,14 +82,14 @@ class Floor(object):
         fig = go.Figure()
 
         if draw_slab:
-            for s in self.slab.values():
+            for s in self.slab:
                 s.plot_plotly(
                     fig=fig,
                     fill=fill,
                     **kwargs
                 )
         if draw_rect:
-            for r in self.rect.values():
+            for r in self.rect:
                 r.plot_plotly(
                     fig=fig,
                     fill=fill,
@@ -107,3 +120,41 @@ class Floor(object):
         fig.update_xaxes(title_text='x (m)', hoverformat='.3f')
         fig.update_yaxes(title_text='y (m)', hoverformat='.3f')
         return fig
+
+    def mutate(self, angle: float, sx: float, sy: float) -> 'Floor':
+        """
+        Apply mutator for each object within the floor.
+
+        :param angle: Angle
+        :param sx: Scale on x-axis
+        :param sy: Scale on y-axis
+        :return: Floor reference
+        """
+        assert isinstance(angle, (int, float))
+        assert isinstance(sx, (int, float)) and sx != 0
+        assert isinstance(sy, (int, float)) and sy != 0
+
+        # Undo last mutation
+        if self._last_mutation is not None:
+            _angle, _sx, _sy = self._last_mutation['angle'], self._last_mutation['sx'], self._last_mutation['sy']
+            self._last_mutation = None
+            self.mutate(_angle, _sx, _sy)
+
+        # Apply mutation
+        rotation_center = GeomPoint2D()
+        o: Tuple['BaseComponent']
+        for o in (self.rect, self.slab):
+            for c in o:
+                for p in c.points:
+                    p.x *= sx
+                    p.y *= sy
+                    p.rotate(rotation_center, angle)
+
+        # Update mutation
+        self._last_mutation = {
+            'angle': -angle,
+            'sx': 1 / sx,
+            'sy': 1 / sy
+        }
+
+        return self

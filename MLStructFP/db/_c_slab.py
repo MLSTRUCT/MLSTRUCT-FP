@@ -4,23 +4,21 @@ MLSTRUCTFP - DB - CSLAB
 Slab component.
 """
 
+from MLStructFP.db._c import BaseComponent
+
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from MLStructFP.db._cfloor import Floor
+    from MLStructFP.db._floor import Floor
 
 
-class Slab(object):
+class Slab(BaseComponent):
     """
     FP Slab.
     """
-    floor: 'Floor'
-    id: int
-    x: List[float]
-    y: List[float]
 
     def __init__(
             self,
@@ -37,14 +35,9 @@ class Slab(object):
         :param x: List of coordinates within x-axis
         :param y: List of coordinates within y-axis
         """
-        assert isinstance(slab_id, int) and slab_id > 0
-        assert isinstance(x, (list, tuple)) and len(x) > 0
-        assert isinstance(y, (list, tuple)) and len(y) == len(x)
-        self.floor = floor
-        self.floor.slab[slab_id] = self
-        self.id = slab_id
-        self.x = list(x)
-        self.y = list(y)
+        BaseComponent.__init__(self, slab_id, x, y, floor)
+        # noinspection PyProtectedMember
+        self.floor._slab[slab_id] = self
 
     def svg_path(self, dx: float = 0, dy: float = 0) -> str:
         """
@@ -54,7 +47,7 @@ class Slab(object):
         :param dx: X displacement
         :param dy: Y displacement
         """
-        px, py = [x for x in self.x], [y for y in self.y]
+        px, py = [p.x for p in self.points], [p.y for p in self.points]
         for i in range(len(px)):  # Adds displacement (dx, dy)
             px[i] += dx
             py[i] += dy
@@ -111,7 +104,7 @@ class Slab(object):
         :param linewidth: Plot linewidth
         :param alpha: Alpha transparency value (0-1)
         """
-        px, py = [x for x in self.x], [y for y in self.y]
+        px, py = [p.x for p in self.points], [p.y for p in self.points]
         px.append(px[0])
         py.append(py[0])
         ax.plot(px, py, '-', color='#666666', linewidth=linewidth, alpha=alpha)

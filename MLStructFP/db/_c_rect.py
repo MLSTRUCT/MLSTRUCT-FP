@@ -6,6 +6,7 @@ Rectangle component.
 
 __all__ = ['Rect']
 
+from MLStructFP.db._c import BaseComponent
 from MLStructFP.utils import GeomLine2D
 
 import matplotlib.pyplot as plt
@@ -14,22 +15,18 @@ import plotly.graph_objects as go
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from MLStructFP.db._cfloor import Floor
+    from MLStructFP.db._floor import Floor
 
 
-class Rect(object):
+class Rect(BaseComponent):
     """
     FP Rectangle.
     """
     angle: float
-    floor: 'Floor'
-    id: int
     length: float
     line: GeomLine2D
     thickness: float
     wall: int
-    x: List[float]
-    y: List[float]
 
     def __init__(
             self,
@@ -60,19 +57,14 @@ class Rect(object):
         :param line_n: Line intercept
         :param line_theta: Line angle
         """
-        assert isinstance(rect_id, int) and rect_id > 0
+        BaseComponent.__init__(self, rect_id, x, y, floor)
         assert isinstance(wall_id, int) and wall_id > 0
         assert isinstance(angle, (int, float))
         assert isinstance(length, (int, float)) and length > 0
-        assert isinstance(x, (list, tuple)) and len(x) > 0
-        assert isinstance(y, (list, tuple)) and len(y) == len(x)
         assert isinstance(line_m, (int, float))
         assert isinstance(line_n, (int, float))
         assert isinstance(line_theta, (int, float))
         self.angle = float(angle)
-        self.floor = floor
-        self.floor.rect[rect_id] = self
-        self.id = rect_id
         self.length = float(length)
         self.line = GeomLine2D()
         self.line.m = float(line_m)
@@ -80,8 +72,8 @@ class Rect(object):
         self.line.theta = float(line_theta)
         self.thickness = float(thickness)
         self.wall = wall_id
-        self.x = list(x)
-        self.y = list(y)
+        # noinspection PyProtectedMember
+        self.floor._rect[self.id] = self
 
     def plot_plotly(
             self,
@@ -106,14 +98,14 @@ class Rect(object):
         :param color: Color, if empty use default object color
         :param show_legend: Add object legend to plot
         """
-        rectx, recty = [x for x in self.x], [y for y in self.y]
-        rectx.append(rectx[0])
-        recty.append(recty[0])
+        px, py = [p.x for p in self.points], [p.y for p in self.points]
+        px.append(px[0])
+        py.append(py[0])
         if color == '':
             color = '#000000'
-        for i in range(len(rectx)):
-            rectx[i] += dx
-            recty[i] += dy
+        for i in range(len(px)):
+            px[i] += dx
+            py[i] += dy
         _fill = 'none'
         if fill:
             _fill = 'toself'
@@ -124,8 +116,8 @@ class Rect(object):
             name=f'Rect ID {self.id} - W {self.wall} ∢{round(self.angle, 3)}°{postname}',
             opacity=opacity,
             showlegend=show_legend,
-            x=rectx,
-            y=recty
+            x=px,
+            y=py
         ))
 
     def plot_matplotlib(
@@ -147,8 +139,8 @@ class Rect(object):
         """
         if color == '':
             color = '#000000'
-        rectx, recty = [x for x in self.x], [y for y in self.y]
+        px, py = [p.x for p in self.points], [p.y for p in self.points]
         if fill:
-            ax.fill(rectx, recty, color=color, lw=None, alpha=alpha)
+            ax.fill(px, py, color=color, lw=None, alpha=alpha)
         else:
-            ax.plot(rectx, recty, color=color, lw=linewidth, alpha=alpha)
+            ax.plot(px, py, color=color, lw=linewidth, alpha=alpha)

@@ -6,9 +6,9 @@ Loads a given database.json file.
 
 __all__ = ['DbLoader']
 
-from MLStructFP.db._cfloor import Floor
-from MLStructFP.db._crect import Rect
-from MLStructFP.db._cslab import Slab
+from MLStructFP.db._floor import Floor
+from MLStructFP.db._c_rect import Rect
+from MLStructFP.db._c_slab import Slab
 
 import json
 import os
