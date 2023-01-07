@@ -8,6 +8,9 @@ __all__ = ['Rect']
 
 from MLStructFP.utils import GeomLine2D
 
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -79,3 +82,73 @@ class Rect(object):
         self.wall = wall_id
         self.x = list(x)
         self.y = list(y)
+
+    def plot_plotly(
+            self,
+            fig: 'go.Figure',
+            dx: float = 0,
+            dy: float = 0,
+            postname: str = '',
+            fill: bool = False,
+            opacity: float = 1.0,
+            color: str = '',
+            show_legend: bool = True
+    ) -> None:
+        """
+        Plot rect.
+
+        :param fig: Figure object
+        :param dx: X displacement
+        :param dy: Y displacement
+        :param postname: String added at the end of the name
+        :param fill: Fill figure
+        :param opacity: Object opacity
+        :param color: Color, if empty use default object color
+        :param show_legend: Add object legend to plot
+        """
+        rectx, recty = [x for x in self.x], [y for y in self.y]
+        rectx.append(rectx[0])
+        recty.append(recty[0])
+        if color == '':
+            color = '#000000'
+        for i in range(len(rectx)):
+            rectx[i] += dx
+            recty[i] += dy
+        _fill = 'none'
+        if fill:
+            _fill = 'toself'
+        fig.add_trace(go.Scatter(
+            fill=_fill,
+            line=dict(color=color),
+            mode='lines',
+            name=f'Rect ID {self.id} - W {self.wall} ∢{round(self.angle, 3)}°{postname}',
+            opacity=opacity,
+            showlegend=show_legend,
+            x=rectx,
+            y=recty
+        ))
+
+    def plot_matplotlib(
+            self,
+            ax: 'plt.Axes',
+            linewidth: float = 2.0,
+            alpha: float = 1.0,
+            color: str = '',
+            fill: bool = True
+    ) -> None:
+        """
+        Plot simple using matplotlib.
+
+        :param ax: Matplotlib axes reference
+        :param linewidth: Plot linewidth
+        :param alpha: Alpha transparency value (0-1)
+        :param color: Override color
+        :param fill: Fill rect object
+        """
+        if color == '':
+            color = '#000000'
+        rectx, recty = [x for x in self.x], [y for y in self.y]
+        if fill:
+            ax.fill(rectx, recty, color=color, lw=None, alpha=alpha)
+        else:
+            ax.plot(rectx, recty, color=color, lw=linewidth, alpha=alpha)

@@ -1,11 +1,18 @@
-# IDEs
+# Cache
+__pycache__
+
+# IDE
 .idea
+.vscode
+
+# Jupyter
+**.ipynb
+.ipyndb_checkpoints
 
 # DB
 database/
 
 # Other
-__pycache__
 _dev_*
 .old
 ~$*

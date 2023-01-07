@@ -19,4 +19,4 @@ class DbLoaderTest(unittest.TestCase):
         """
         db = DbLoader('data/fp.json')
         self.assertEqual(os.path.join(Path(os.getcwd()), 'data'), db._path)
-        print(db.floors)
+        print(db.floor)

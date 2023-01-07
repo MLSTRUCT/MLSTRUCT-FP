@@ -22,7 +22,7 @@ class DbLoader(object):
     Database loader.
     """
     _path: str
-    floors: Dict[int, 'Floor']
+    floor: Dict[int, 'Floor']
 
     def __init__(self, db: str) -> None:
         """
@@ -32,7 +32,7 @@ class DbLoader(object):
         """
         assert os.path.isfile(db), f'Database file {db} not found'
         self._path = str(Path(os.path.realpath(db)).parent)
-        self.floors = {}
+        self.floor = {}
 
         with open(db, 'r', encoding='utf8') as dbfile:
             data = json.load(dbfile)
@@ -40,7 +40,7 @@ class DbLoader(object):
             # Assemble objects
             for f_id in data['floor']:
                 f_data = data['floor'][f_id]
-                self.floors[int(f_id)] = Floor(
+                self.floor[int(f_id)] = Floor(
                     floor_id=int(f_id),
                     image_path=os.path.join(self._path, f_data['image']),
                     image_scale=f_data['scale']
@@ -51,7 +51,7 @@ class DbLoader(object):
                 Rect(
                     rect_id=int(rect_id),
                     wall_id=rect_data['wallID'],
-                    floor=self.floors[rect_data['floorID']],
+                    floor=self.floor[rect_data['floorID']],
                     angle=rect_a if not isinstance(rect_a, list) else rect_a[0],
                     length=rect_data['length'],
                     thickness=rect_data['thickness'],
@@ -65,7 +65,7 @@ class DbLoader(object):
                 slab_data = data['slab'][slab_id]
                 Slab(
                     slab_id=int(slab_id),
-                    floor=self.floors[slab_data['floorID']],
+                    floor=self.floor[slab_data['floorID']],
                     x=slab_data['x'],
                     y=slab_data['y']
                 )

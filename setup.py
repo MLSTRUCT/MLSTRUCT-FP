@@ -11,8 +11,8 @@ import MLStructFP
 
 # Setup library
 setup(
-    author=MLAi.__author__,
-    author_email=MLAi.__email__,
+    author=MLStructFP.__author__,
+    author_email=MLStructFP.__email__,
     classifiers=[
         'Natural Language :: English',
         'Operating System :: OS Independent',
@@ -21,7 +21,7 @@ setup(
         'Programming Language :: Python',
         'Topic :: Structural/Engineering'
     ],
-    description=MLAi.__description__,
+    description=MLStructFP.__description__,
     include_package_data=True,
     install_requires=[
         'dill >= 0.3.3',
@@ -59,21 +59,21 @@ setup(
         'tqdm >= 4.59.0',
         'triangle >= 20200424'  # https://www.lfd.uci.edu/~gohlke/pythonlibs/#triangle
     ],
-    keywords=MLAi.__keywords__,
-    name='MLAi',
+    keywords=MLStructFP.__keywords__,
+    name='MLStructFP',
     packages=find_packages(exclude=[
         '.idea',
         '.ipynb_checkpoints',
-        'data',
+        'database',
         'test'
     ]),
     platforms=['any'],
     project_urls={
-        'Bug Tracker': MLAi.__url_bug_tracker__,
-        'Documentation': MLAi.__url_documentation__,
-        'Source Code': MLAi.__url_source_code__
+        'Bug Tracker': MLStructFP.__url_bug_tracker__,
+        'Documentation': MLStructFP.__url_documentation__,
+        'Source Code': MLStructFP.__url_source_code__
     },
     python_requires='>=3.8',
-    url=MLAi.__url__,
-    version=MLAi.__version__
+    url=MLStructFP.__url__,
+    version=MLStructFP.__version__
 )
