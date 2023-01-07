@@ -6,12 +6,12 @@ Rectangle component.
 
 __all__ = ['Rect']
 
-from mlstructfp.utils import GeomLine2D
+from MLStructFP.utils import GeomLine2D
 
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from mlstructfp.db._cfloor import Floor
+    from MLStructFP.db._cfloor import Floor
 
 
 class Rect(object):

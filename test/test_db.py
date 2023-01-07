@@ -8,7 +8,7 @@ import os
 import unittest
 from pathlib import Path
 
-from mlstructfp.db import DbLoader
+from MLStructFP.db import DbLoader
 
 
 class DbLoaderTest(unittest.TestCase):
@@ -19,3 +19,4 @@ class DbLoaderTest(unittest.TestCase):
         """
         db = DbLoader('data/fp.json')
         self.assertEqual(os.path.join(Path(os.getcwd()), 'data'), db._path)
+        print(db.floors)

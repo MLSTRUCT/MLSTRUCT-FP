@@ -11,8 +11,8 @@ import os
 from typing import Dict, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from mlstructfp.db._crect import Rect
-    from mlstructfp.db._cslab import Slab
+    from MLStructFP.db._crect import Rect
+    from MLStructFP.db._cslab import Slab
 
 
 class Floor(object):

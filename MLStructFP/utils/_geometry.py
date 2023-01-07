@@ -6,7 +6,7 @@ Line definition class.
 
 __all__ = ['GeomLine2D', 'GeomPoint2D']
 
-from mlstructfp.utils._mathlib import dist2
+from MLStructFP.utils._mathlib import dist2
 
 import math
 import matplotlib.pyplot as plt
