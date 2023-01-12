@@ -7,11 +7,10 @@ Floor component, container of slabs and rectangles.
 __all__ = ['Floor']
 
 from MLStructFP.utils import GeomPoint2D
+from MLStructFP._types import Dict, Tuple, Optional, TYPE_CHECKING, NumberType, NumberInstance
 
 import os
 import plotly.graph_objects as go
-
-from typing import Dict, Tuple, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from MLStructFP.db._c import BaseComponent
@@ -30,7 +29,7 @@ class Floor(object):
     image_path: str
     image_scale: float
 
-    def __init__(self, floor_id: int, image_path: str, image_scale: float) -> None:
+    def __init__(self, floor_id: int, image_path: str, image_scale: NumberType) -> None:
         """
         Constructor.
 
@@ -40,7 +39,7 @@ class Floor(object):
         """
         assert isinstance(floor_id, int) and floor_id > 0
         assert os.path.isfile(image_path)
-        assert isinstance(image_scale, (int, float)) and image_scale > 0
+        assert isinstance(image_scale, NumberInstance) and image_scale > 0
         self.id = floor_id
         self.image_path = image_path
         self.image_scale = float(image_scale)
@@ -121,7 +120,7 @@ class Floor(object):
         fig.update_yaxes(title_text='y (m)', hoverformat='.3f')
         return fig
 
-    def mutate(self, angle: float, sx: float, sy: float) -> 'Floor':
+    def mutate(self, angle: NumberType = 0, sx: NumberType = 1, sy: NumberType = 1) -> 'Floor':
         """
         Apply mutator for each object within the floor.
 
@@ -130,15 +129,15 @@ class Floor(object):
         :param sy: Scale on y-axis
         :return: Floor reference
         """
-        assert isinstance(angle, (int, float))
-        assert isinstance(sx, (int, float)) and sx != 0
-        assert isinstance(sy, (int, float)) and sy != 0
+        assert isinstance(angle, NumberInstance)
+        assert isinstance(sx, NumberInstance) and sx != 0
+        assert isinstance(sy, NumberInstance) and sy != 0
 
         # Undo last mutation
         if self._last_mutation is not None:
             _angle, _sx, _sy = self._last_mutation['angle'], self._last_mutation['sx'], self._last_mutation['sy']
             self._last_mutation = None
-            self.mutate(_angle, _sx, _sy)
+            self.mutate(-_angle, 1 / _sx, 1 / _sy)
 
         # Apply mutation
         rotation_center = GeomPoint2D()
@@ -152,9 +151,9 @@ class Floor(object):
 
         # Update mutation
         self._last_mutation = {
-            'angle': -angle,
-            'sx': 1 / sx,
-            'sy': 1 / sy
+            'angle': angle,
+            'sx': sx,
+            'sy': sy
         }
 
         return self

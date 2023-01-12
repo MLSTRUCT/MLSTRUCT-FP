@@ -7,12 +7,11 @@ Rectangle component.
 __all__ = ['Rect']
 
 from MLStructFP.db._c import BaseComponent
+from MLStructFP._types import NumberType, NumberInstance, List, TYPE_CHECKING
 from MLStructFP.utils import GeomLine2D
 
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-
-from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from MLStructFP.db._floor import Floor
@@ -33,14 +32,14 @@ class Rect(BaseComponent):
             rect_id: int,
             wall_id: int,
             floor: 'Floor',
-            angle: float,
-            length: float,
-            thickness: float,
+            angle: NumberType,
+            length: NumberType,
+            thickness: NumberType,
             x: List[float],
             y: List[float],
-            line_m: float,
-            line_n: float,
-            line_theta: float
+            line_m: NumberType,
+            line_n: NumberType,
+            line_theta: NumberType
     ) -> None:
         """
         Constructor.
@@ -59,11 +58,11 @@ class Rect(BaseComponent):
         """
         BaseComponent.__init__(self, rect_id, x, y, floor)
         assert isinstance(wall_id, int) and wall_id > 0
-        assert isinstance(angle, (int, float))
-        assert isinstance(length, (int, float)) and length > 0
-        assert isinstance(line_m, (int, float))
-        assert isinstance(line_n, (int, float))
-        assert isinstance(line_theta, (int, float))
+        assert isinstance(angle, NumberInstance)
+        assert isinstance(length, NumberInstance) and length > 0
+        assert isinstance(line_m, NumberInstance)
+        assert isinstance(line_n, NumberInstance)
+        assert isinstance(line_theta, NumberInstance)
         self.angle = float(angle)
         self.length = float(length)
         self.line = GeomLine2D()
@@ -78,11 +77,11 @@ class Rect(BaseComponent):
     def plot_plotly(
             self,
             fig: 'go.Figure',
-            dx: float = 0,
-            dy: float = 0,
+            dx: NumberType = 0,
+            dy: NumberType = 0,
             postname: str = '',
             fill: bool = False,
-            opacity: float = 1.0,
+            opacity: NumberType = 1.0,
             color: str = '',
             show_legend: bool = True
     ) -> None:
@@ -102,7 +101,7 @@ class Rect(BaseComponent):
         px.append(px[0])
         py.append(py[0])
         if color == '':
-            color = '#000000'
+            color = '#0000ff'
         for i in range(len(px)):
             px[i] += dx
             py[i] += dy
@@ -123,8 +122,8 @@ class Rect(BaseComponent):
     def plot_matplotlib(
             self,
             ax: 'plt.Axes',
-            linewidth: float = 2.0,
-            alpha: float = 1.0,
+            linewidth: NumberType = 2.0,
+            alpha: NumberType = 1.0,
             color: str = '',
             fill: bool = True
     ) -> None:

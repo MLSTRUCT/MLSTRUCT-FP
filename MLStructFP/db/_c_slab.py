@@ -5,11 +5,10 @@ Slab component.
 """
 
 from MLStructFP.db._c import BaseComponent
+from MLStructFP._types import List, TYPE_CHECKING, NumberType
 
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-
-from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from MLStructFP.db._floor import Floor
@@ -39,7 +38,7 @@ class Slab(BaseComponent):
         # noinspection PyProtectedMember
         self.floor._slab[slab_id] = self
 
-    def svg_path(self, dx: float = 0, dy: float = 0) -> str:
+    def svg_path(self, dx: NumberType = 0, dy: NumberType = 0) -> str:
         """
         Get svg path for plotting the object.
 
@@ -61,10 +60,10 @@ class Slab(BaseComponent):
     def plot_plotly(
             self,
             fig: 'go.Figure',
-            dx: float = 0,
-            dy: float = 0,
+            dx: NumberType = 0,
+            dy: NumberType = 0,
             postname: str = '',
-            opacity: float = 0.2,
+            opacity: NumberType = 0.2,
             color: str = '',
             **kwargs
     ) -> None:
@@ -94,8 +93,8 @@ class Slab(BaseComponent):
     def plot_matplotlib(
             self,
             ax: 'plt.Axes',
-            linewidth: float = 2.0,
-            alpha: float = 1.0
+            linewidth: NumberType = 2.0,
+            alpha: NumberType = 1.0
     ) -> None:
         """
         Plot simple using matplotlib.

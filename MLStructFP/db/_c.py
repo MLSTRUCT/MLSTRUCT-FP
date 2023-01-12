@@ -7,8 +7,7 @@ Base FP component.
 __all__ = ['BaseComponent']
 
 from MLStructFP.utils import GeomPoint2D
-
-from typing import List, TYPE_CHECKING
+from MLStructFP._types import List, TYPE_CHECKING, VectorInstance
 
 if TYPE_CHECKING:
     from MLStructFP.db._floor import Floor
@@ -38,8 +37,8 @@ class BaseComponent(object):
         :param floor: Floor object
         """
         assert isinstance(component_id, int) and component_id > 0
-        assert isinstance(x, (list, tuple)) and len(x) > 0
-        assert isinstance(y, (list, tuple)) and len(y) == len(x)
+        assert isinstance(x, VectorInstance) and len(x) > 0
+        assert isinstance(y, VectorInstance) and len(y) == len(x)
         self.id = component_id
         self.floor = floor
         self.points = []
