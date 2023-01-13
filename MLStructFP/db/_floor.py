@@ -120,13 +120,14 @@ class Floor(object):
         fig.update_yaxes(title_text='y (m)', hoverformat='.3f')
         return fig
 
-    def mutate(self, angle: NumberType = 0, sx: NumberType = 1, sy: NumberType = 1) -> 'Floor':
+    def mutate(self, angle: NumberType = 0, sx: NumberType = 1, sy: NumberType = 1, scale_first: bool = True) -> 'Floor':
         """
         Apply mutator for each object within the floor.
 
         :param angle: Angle
         :param sx: Scale on x-axis
         :param sy: Scale on y-axis
+        :param scale_first: Scale first, then rotate
         :return: Floor reference
         """
         assert isinstance(angle, NumberInstance)
@@ -135,9 +136,9 @@ class Floor(object):
 
         # Undo last mutation
         if self._last_mutation is not None:
-            _angle, _sx, _sy = self._last_mutation['angle'], self._last_mutation['sx'], self._last_mutation['sy']
-            self._last_mutation = None
-            self.mutate(-_angle, 1 / _sx, 1 / _sy)
+            _angle, _sx, _sy = self.mutator_angle, self.mutator_scale_x, self.mutator_scale_y
+            self._last_mutation = None  # Reset mutation
+            self.mutate(-_angle, 1 / _sx, 1 / _sy, scale_first=False)  # Reverse operation
 
         # Apply mutation
         rotation_center = GeomPoint2D()
@@ -145,9 +146,12 @@ class Floor(object):
         for o in (self.rect, self.slab):
             for c in o:
                 for p in c.points:
+                    if not scale_first:
+                        p.rotate(rotation_center, angle)
                     p.x *= sx
                     p.y *= sy
-                    p.rotate(rotation_center, angle)
+                    if scale_first:
+                        p.rotate(rotation_center, angle)
 
         # Update mutation
         self._last_mutation = {
@@ -157,3 +161,15 @@ class Floor(object):
         }
 
         return self
+
+    @property
+    def mutator_angle(self) -> float:
+        return float(0 if self._last_mutation is None else self._last_mutation['angle'])
+
+    @property
+    def mutator_scale_x(self) -> float:
+        return float(1 if self._last_mutation is None else self._last_mutation['sx'])
+
+    @property
+    def mutator_scale_y(self) -> float:
+        return float(1 if self._last_mutation is None else self._last_mutation['sy'])

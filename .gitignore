@@ -10,6 +10,7 @@ __pycache__
 .ipyndb_checkpoints
 
 # DB
+.db/
 database/
 
 # Other
