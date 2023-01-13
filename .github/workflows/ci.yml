@@ -1,0 +1,27 @@
+name: CI
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.repository }}-${{ github.workflow }}-${{ github.ref }}
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    uses: ppizarror/workflow-actions/.github/workflows/test_python.yml@master
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+    with:
+      cache-dependency-path: '**/setup.py'
+      env-vars: GITHUB=true
+      os: ${{ matrix.os }}
+      python-version: 3.8

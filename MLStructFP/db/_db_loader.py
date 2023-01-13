@@ -9,6 +9,7 @@ __all__ = ['DbLoader']
 from MLStructFP.db._floor import Floor
 from MLStructFP.db._c_rect import Rect
 from MLStructFP.db._c_slab import Slab
+from MLStructFP._types import Tuple
 
 import json
 import os
@@ -69,3 +70,7 @@ class DbLoader(object):
                     x=slab_data['x'],
                     y=slab_data['y']
                 )
+
+    @property
+    def floors(self) -> Tuple['Floor']:
+        return tuple(self.floor.values())
