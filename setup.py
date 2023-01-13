@@ -9,6 +9,22 @@ Setup distribution.
 from setuptools import setup, find_packages
 import MLStructFP
 
+requirements = [
+    'matplotlib == 3.5.3',
+    'numpy == 1.18.5',
+    'opencv-python == 4.5.1.48',
+    'Pillow == 9.4.0',
+    'plotly == 5.11.0',
+    'requests == 2.28.1',
+    'six == 1.16.0'
+]
+
+requirements_tests = requirements.copy()
+requirements_tests.extend([
+    'codecov',
+    'nose2'
+])
+
 # Setup library
 setup(
     author=MLStructFP.__author__,
@@ -23,16 +39,10 @@ setup(
     ],
     description=MLStructFP.__description__,
     include_package_data=True,
-    install_requires=[
-        'matplotlib == 3.5.3',
-        'nose2 == 0.12.0',
-        'numpy == 1.18.5',
-        'opencv-python == 4.5.1.48',
-        'Pillow == 9.4.0',
-        'plotly == 5.11.0',
-        'requests == 2.28.1',
-        'six == 1.16.0'
-    ],
+    install_requires=requirements,
+    extras_require={
+        'test': requirements_tests
+    },
     keywords=MLStructFP.__keywords__,
     name='MLStructFP',
     packages=find_packages(exclude=[
