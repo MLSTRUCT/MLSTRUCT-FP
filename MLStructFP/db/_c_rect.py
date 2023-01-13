@@ -8,7 +8,7 @@ __all__ = ['Rect']
 
 from MLStructFP.db._c import BaseComponent
 from MLStructFP._types import NumberType, NumberInstance, List, TYPE_CHECKING
-from MLStructFP.utils import GeomLine2D
+from MLStructFP.utils import GeomLine2D, GeomPoint2D
 
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
@@ -73,6 +73,12 @@ class Rect(BaseComponent):
         self.wall = wall_id
         # noinspection PyProtectedMember
         self.floor._rect[self.id] = self
+
+    def get_mass_center(self) -> 'GeomPoint2D':
+        """
+        Returns the mass center of the rect.
+        """
+        return GeomPoint2D(sum(p.x for p in self.points), sum(p.y for p in self.points)).scale(1 / len(self.points))
 
     def plot_plotly(
             self,
