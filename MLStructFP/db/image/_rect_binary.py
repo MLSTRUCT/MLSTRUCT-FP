@@ -7,7 +7,6 @@ Image of the surroundings of a rect.
 __all__ = ['RectBinaryImage']
 
 from MLStructFP.db.image._base import BaseImage
-from MLStructFP.utils import GeomPoint2D
 from MLStructFP._types import TYPE_CHECKING, Tuple, Dict, NumberType
 
 from PIL import Image
@@ -24,6 +23,7 @@ import os
 
 if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
+    from MLStructFP.utils import GeomPoint2D
     from matplotlib.figure import Figure
 
 HIGHLIGHT_RECT = False

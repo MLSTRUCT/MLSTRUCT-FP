@@ -296,9 +296,6 @@ class RectFloorPhoto(BaseImage):
         assert 0 <= empty_color <= 255
 
         self._empty_color = empty_color
-        self._image_size = image_size_px
-        self._crop_length = crop_length  # This produces blocks of (2*BOUNDFACTOR x 2*BOUNDFACTOR) size
-
         self._export_compressed = False  # Export as a compressed numpy file
         self._export_current = 0  # Total exported projects
         self._export_each = 0  # Export each N finished projects
