@@ -75,3 +75,9 @@ class BaseImage(object):
         Export image.
         """
         raise NotImplementedError()
+
+    def close(self) -> None:
+        """
+        Close and delete all generated figures.
+        """
+        raise NotImplementedError()

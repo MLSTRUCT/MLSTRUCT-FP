@@ -8,7 +8,7 @@ __all__ = ['RectBinaryImage']
 
 from MLStructFP.db.image._base import BaseImage
 from MLStructFP.utils import GeomPoint2D
-from MLStructFP._types import TYPE_CHECKING, Tuple, Dict, Optional, NumberType
+from MLStructFP._types import TYPE_CHECKING, Tuple, Dict, NumberType
 
 from PIL import Image
 import cv2
@@ -34,17 +34,15 @@ TYPE_IMAGE = 'uint8'
 
 assert HIGHLIGHT_RECT_COLOR != HIGHLIGHT_RECT, 'Highlight color must be different'
 INITIAL_BACKEND = matplotlib.get_backend()
-# print(f'Initial matplotlib backend: {INITIAL_BACKEND}')
 
 
 class RectBinaryImage(BaseImage):
     """
-    Rect image.
+    Rect binary image.
     """
     _crop_px: int
     _initial_backend: str
     _initialized: bool
-    _last_type: Optional[bool]
     _plot: Dict[str, Tuple['Figure', 'plt.Axes']]
 
     def __init__(

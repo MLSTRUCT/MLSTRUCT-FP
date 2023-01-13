@@ -449,7 +449,6 @@ class RectFloorPhoto(BaseImage):
         ay = sc / _sgn(sy)
 
         cr: 'GeomPoint2D' = rect.get_mass_center()
-        print(sc, sx, sy, cr.x, cr.y, floor.mutator_angle, floor.mutator_scale_x, floor.mutator_scale_y)
         cr.rotate(GeomPoint2D(), -floor.mutator_angle)
 
         # Scale to pixels
@@ -480,7 +479,6 @@ class RectFloorPhoto(BaseImage):
         xmax = int((cr.x + self._crop_length) * ax)
         ymin = int((cr.y - self._crop_length) * ay)
         ymax = int((cr.y + self._crop_length) * ay)
-        print(rect.id, xmin, xmax, ymin, ymax, (w, h))
 
         if self._verbose:
             print(f'Processing rect ID <{rect.id}>')
@@ -603,7 +601,7 @@ class RectFloorPhoto(BaseImage):
 
     def close(self) -> None:
         """
-        Close feature files and clear memory.
+        Close and delete all generated figures.
         """
         del self._names
         self._names = []
