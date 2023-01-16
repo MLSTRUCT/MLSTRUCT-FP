@@ -10,12 +10,13 @@ __pycache__
 .ipyndb_checkpoints
 
 # Build
+*.egg-info
 build/
 dist/
-*.egg-info
 
 # Other
-.db/
 _dev_*
+.db/
 .old
+*.zip
 ~$*
