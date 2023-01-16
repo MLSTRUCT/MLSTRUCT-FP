@@ -14,9 +14,12 @@ __pycache__
 build/
 dist/
 
+# Dataset
+dataset/
+dataset-*.zip
+
 # Other
 _dev_*
 .db/
 .old
-*.zip
 ~$*
