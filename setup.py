@@ -8,6 +8,11 @@ Setup distribution.
 from setuptools import setup, find_packages
 import MLStructFP
 
+# Load readme
+with open('README.rst') as f:
+    long_description = f.read()
+
+# Load requirements
 requirements = [
     'matplotlib == 3.5.3',
     'numpy == 1.18.5',
@@ -37,6 +42,7 @@ setup(
         'Topic :: Structural/Engineering'
     ],
     description=MLStructFP.__description__,
+    long_description=long_description,
     include_package_data=True,
     install_requires=requirements,
     extras_require={
@@ -47,7 +53,6 @@ setup(
     packages=find_packages(exclude=[
         '.idea',
         '.ipynb_checkpoints',
-        'database',
         'test'
     ]),
     platforms=['any'],

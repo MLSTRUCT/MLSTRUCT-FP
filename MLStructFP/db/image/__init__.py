@@ -1,7 +1,7 @@
 """
 MLSTRUCTFP - DB - IMAGE
 
-Database image operations.
+Dataset image operations.
 """
 
 from MLStructFP.db.image._rect_binary import RectBinaryImage

@@ -1,7 +1,7 @@
 """
 MLSTRUCTFP - DB - DBLOADER
 
-Loads a given database.json file.
+Loads a given dataset .json file.
 """
 
 __all__ = ['DbLoader']
@@ -20,18 +20,18 @@ from typing import Dict
 
 class DbLoader(object):
     """
-    Database loader.
+    Dataset loader.
     """
     _path: str
     floor: Dict[int, 'Floor']
 
     def __init__(self, db: str) -> None:
         """
-        Loads a database file.
+        Loads a dataset file.
 
-        :param db: Database path
+        :param db: Dataset path
         """
-        assert os.path.isfile(db), f'Database file {db} not found'
+        assert os.path.isfile(db), f'Dataset file {db} not found'
         self._path = str(Path(os.path.realpath(db)).parent)
         self.floor = {}
 

@@ -1,7 +1,7 @@
 """
 MLSTRUCTFP - DB
 
-Database load and objects.
+Dataset load and objects.
 """
 
 from MLStructFP.db._floor import Floor

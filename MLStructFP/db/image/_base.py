@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 class BaseImage(object):
     """
-    Base database image object.
+    Base dataset image object.
     """
     _crop_length: NumberType
     _image_size: int

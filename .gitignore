@@ -9,16 +9,13 @@ __pycache__
 **.ipynb
 .ipyndb_checkpoints
 
-# DB
-.db/
-database/
-
 # Build
 build/
 dist/
 *.egg-info
 
 # Other
+.db/
 _dev_*
 .old
 ~$*

@@ -1,7 +1,7 @@
 """
 MLSTRUCTFP - TEST - DB
 
-Test the database loader and object components (rect, slab, floor).
+Test the dataset loader and object components (rect, slab, floor).
 """
 
 import numpy as np
@@ -18,7 +18,7 @@ class DbLoaderTest(unittest.TestCase):
 
     def test_db_load(self) -> None:
         """
-        Test db loader path and number of database items.
+        Test db loader path and number of dataset items.
         """
         db = DbLoader(DB_PATH)
         self.assertEqual(os.path.dirname(DB_PATH), db._path)
