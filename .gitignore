@@ -13,6 +13,11 @@ __pycache__
 .db/
 database/
 
+# Build
+build/
+dist/
+*.egg-info
+
 # Other
 _dev_*
 .old
