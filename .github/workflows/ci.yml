@@ -13,11 +13,6 @@ on:
       - master
 
 jobs:
-  codeql:
-    uses: ppizarror/workflow-actions/.github/workflows/codeql.yml@master
-    with:
-      language: python
-
   test:
     uses: ppizarror/workflow-actions/.github/workflows/test_python.yml@master
     strategy:
@@ -30,3 +25,8 @@ jobs:
       env-vars: GITHUB=true
       os: ${{ matrix.os }}
       python-version: 3.8
+
+  codeql:
+    uses: ppizarror/workflow-actions/.github/workflows/codeql.yml@master
+    with:
+      language: python
