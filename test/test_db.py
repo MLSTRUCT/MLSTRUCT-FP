@@ -60,6 +60,7 @@ class DbLoaderTest(unittest.TestCase):
             self.assertEqual(round(p.y, 1), y)
 
         # Test no mutator
+        bb = f.bounding_box
         self.assertEqual(f.mutator_angle, 0)
         self.assertEqual(f.mutator_scale_x, 1)
         self.assertEqual(f.mutator_scale_y, 1)
@@ -68,9 +69,13 @@ class DbLoaderTest(unittest.TestCase):
         # Test rotation
         f.mutate(45)
         test(54.3, 63.2)
+        self.assertNotEqual(bb, f.bounding_box)
 
         # Rollback angle
         f.mutate()
+        bb2 = f.bounding_box
+        self.assertAlmostEqual(bb.xmin, bb2.xmin)
+        self.assertAlmostEqual(bb.ymin, bb2.ymin)
         test(83.1, 6.3)
 
         # Test scale
