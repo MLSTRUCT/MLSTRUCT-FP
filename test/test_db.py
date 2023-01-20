@@ -30,9 +30,13 @@ class DbLoaderTest(unittest.TestCase):
         f = db.floor[302]
         self.assertEqual(len(f.rect), 80)
         self.assertEqual(len(f.slab), 1)
-        r = f.rect[0]
+        self.assertAlmostEqual(f.bounding_box.xmin, 1.08599, places=3)
+        self.assertAlmostEqual(f.bounding_box.xmax, 49.24599, places=3)
+        self.assertAlmostEqual(f.bounding_box.ymin, 11.07863, places=3)
+        self.assertAlmostEqual(f.bounding_box.ymax, 24.69863, places=3)
 
         # Check rectangle data
+        r = f.rect[0]
         self.assertEqual(r.id, 20279)
         self.assertEqual(r.floor.id, 302)
         mc = r.get_mass_center()
@@ -40,6 +44,7 @@ class DbLoaderTest(unittest.TestCase):
         self.assertAlmostEqual(mc.y, 22.13863, places=3)
         self.assertEqual(len(r.points), 4)
 
+        # Check image
         self.assertEqual(f.image_scale, 188.445)
         self.assertEqual(os.path.basename(f.image_path), 'f23ccf42b9c42bfe7c37a1fb7a1ea100e3d34596.png')
 

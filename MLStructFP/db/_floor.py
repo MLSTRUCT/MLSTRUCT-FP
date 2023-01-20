@@ -6,9 +6,10 @@ Floor component, container of slabs and rectangles.
 
 __all__ = ['Floor']
 
-from MLStructFP.utils import GeomPoint2D
+from MLStructFP.utils import GeomPoint2D, BoundingBox
 from MLStructFP._types import Dict, Tuple, Optional, TYPE_CHECKING, NumberType, NumberInstance
 
+import math
 import os
 import plotly.graph_objects as go
 
@@ -22,6 +23,7 @@ class Floor(object):
     """
     FP Floor.
     """
+    _bb: Optional['BoundingBox']
     _last_mutation: Optional[Dict[str, float]]
     _rect: Dict[int, 'Rect']  # id => rect
     _slab: Dict[int, 'Slab']  # id => slab
@@ -43,6 +45,7 @@ class Floor(object):
         self.id = floor_id
         self.image_path = image_path
         self.image_scale = float(image_scale)
+        self._bb = None
         self._last_mutation = None
         self._rect = {}
         self._slab = {}
@@ -120,7 +123,8 @@ class Floor(object):
         fig.update_yaxes(title_text='y (m)', hoverformat='.3f')
         return fig
 
-    def mutate(self, angle: NumberType = 0, sx: NumberType = 1, sy: NumberType = 1, scale_first: bool = True) -> 'Floor':
+    def mutate(self, angle: NumberType = 0, sx: NumberType = 1, sy: NumberType = 1,
+               scale_first: bool = True) -> 'Floor':
         """
         Apply mutator for each object within the floor.
 
@@ -154,6 +158,7 @@ class Floor(object):
                         p.rotate(rotation_center, angle)
 
         # Update mutation
+        self._bb = None
         self._last_mutation = {
             'angle': angle,
             'sx': sx,
@@ -173,3 +178,25 @@ class Floor(object):
     @property
     def mutator_scale_y(self) -> float:
         return float(1 if self._last_mutation is None else self._last_mutation['sy'])
+
+    @property
+    def bounding_box(self) -> 'BoundingBox':
+        """
+        :return: Return the bounding box of the floor, calculated using the slab and the points from the rects.
+        """
+        if self._bb is not None:
+            return self._bb
+        xmin = math.inf
+        xmax = -math.inf
+        ymin = math.inf
+        ymax = -math.inf
+        o: Tuple['BaseComponent']
+        for o in (self.rect, self.slab):
+            for c in o:
+                for p in c.points:
+                    xmin = min(xmin, p.x)
+                    xmax = max(xmax, p.x)
+                    ymin = min(ymin, p.y)
+                    ymax = max(ymax, p.y)
+        self._bb = BoundingBox(xmin, xmax, ymin, ymax)
+        return self._bb

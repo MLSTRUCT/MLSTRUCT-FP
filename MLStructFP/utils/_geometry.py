@@ -4,14 +4,17 @@ MLSTRUCTFP - DB - LINE 2D
 Line definition class.
 """
 
-__all__ = ['GeomLine2D', 'GeomPoint2D']
+__all__ = [
+    'BoundingBox',
+    'GeomLine2D',
+    'GeomPoint2D'
+]
 
 from MLStructFP.utils._mathlib import dist2
+from MLStructFP._types import Dict, Any, List, Union, Tuple, NumberType, NumberInstance
 
 import math
 import matplotlib.pyplot as plt
-
-from typing import Dict, Any, List, Union, Tuple
 
 MIN_TOL: float = 1e-12
 
@@ -20,12 +23,10 @@ class GeomLine2D(object):
     """
     Geometric 2d segment between 2 points.
     """
-
     _def_points: Dict[str, 'GeomPoint2D']
-
-    m: float
-    n: float
-    theta: float
+    m: NumberType
+    n: NumberType
+    theta: NumberType
 
     def __init__(self) -> None:
         """
@@ -76,7 +77,7 @@ class GeomLine2D(object):
         self.theta = math.atan2(m_a, m_b)
         return self
 
-    def eval(self, x: float) -> float:
+    def eval(self, x: NumberType) -> NumberType:
         """
         Eval line at given value.
 
@@ -85,7 +86,7 @@ class GeomLine2D(object):
         """
         return (self.m * x) + self.n
 
-    def f(self, x: float) -> 'GeomPoint2D':
+    def f(self, x: NumberType) -> 'GeomPoint2D':
         """
         Returns new point from (x,Ƒ(x)).
 
@@ -126,7 +127,7 @@ class GeomLine2D(object):
         p2: 'GeomPoint2D' = self._def_points['p2']
         return math.fabs((((p2.x - p1.x) * (p.y - p1.y)) - ((p2.y - p1.y) * (p.x - p1.x)))) < MIN_TOL
 
-    def ortho_distance_point_list(self, point_list: List['GeomPoint2D']) -> List[float]:
+    def ortho_distance_point_list(self, point_list: List['GeomPoint2D']) -> List[NumberType]:
         """
         Calculate the orthographic distance from a point.
 
@@ -138,7 +139,7 @@ class GeomLine2D(object):
             dist.append(self.ortho_distance_point(point_list[i]))
         return dist
 
-    def ortho_distance_point(self, p: 'GeomPoint2D') -> float:
+    def ortho_distance_point(self, p: 'GeomPoint2D') -> NumberType:
         """
         Returns the orthographic distance from a point.
 
@@ -150,7 +151,7 @@ class GeomLine2D(object):
         c = -self.n
         return math.fabs((a * p.x) + (b * p.y) + c) / dist2(a, b)
 
-    def ortho_distance_line(self, line: 'GeomLine2D', force: bool = False) -> float:
+    def ortho_distance_line(self, line: 'GeomLine2D', force: bool = False) -> NumberType:
         """
         Calculate the orthographic distance from another line.
 
@@ -170,19 +171,19 @@ class GeomPoint2D(object):
     """
     2D coordinate.
     """
-
     _data: Dict[str, Any]
+    x: NumberType
+    y: NumberType
 
-    x: float
-    y: float
-
-    def __init__(self, x: float = 0, y: float = 0) -> None:
+    def __init__(self, x: NumberType = 0, y: NumberType = 0) -> None:
         """
         Constructor.
 
         :param x: X coordinate
         :param y: Y coordinate
         """
+        assert isinstance(x, NumberInstance)
+        assert isinstance(y, NumberInstance)
         self.x = float(x)
         self.y = float(y)
         self._data = {}  # Point inner data
@@ -391,3 +392,41 @@ class GeomPoint2D(object):
         assert isinstance(marker_size, int)
         assert isinstance(style, str)
         ax.plot(self.x, self.y, style, markersize=marker_size, color=color)
+
+
+class BoundingBox(object):
+    """
+    Represents a bounding box from (xmin, xmax) to (ymin, ymax).
+    """
+    __xmin: NumberType
+    __xmax: NumberType
+    __ymin: NumberType
+    __ymax: NumberType
+
+    def __init__(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType) -> None:
+        """
+        Constructor.
+        """
+        self.__xmin = xmin
+        self.__xmax = xmax
+        self.__ymin = ymin
+        self.__ymax = ymax
+
+    @property
+    def xmin(self) -> NumberType:
+        return self.__xmin
+
+    @property
+    def xmax(self) -> NumberType:
+        return self.__xmax
+
+    @property
+    def ymin(self) -> NumberType:
+        return self.__ymin
+
+    @property
+    def ymax(self) -> NumberType:
+        return self.__ymax
+
+    def __repr__(self) -> str:
+        return f'BB: x({self.xmin},{self.xmax}), y({self.ymin},{self.ymax})'
