@@ -6,8 +6,7 @@ __pycache__
 .vscode
 
 # Jupyter
-**.ipynb
-.ipyndb_checkpoints
+.ipynb_checkpoints/
 
 # Build
 *.egg-info
