@@ -88,15 +88,15 @@ class DbLoaderTest(unittest.TestCase):
         """
         f = DbLoader(DB_PATH).floors
 
-        image_binary = RectBinaryImage(image_size_px=256, crop_length=5.0).init()
-        image_photo = RectFloorPhoto(image_size_px=256, crop_length=5.0)
+        image_binary = RectBinaryImage(image_size_px=256).init()
+        image_photo = RectFloorPhoto(image_size_px=256)
 
         r = f[0].rect[3]  # Selected rectangle
-        image_binary.make(r)
-        image_photo.make(r)
+        image_binary.make_rect(r)
+        image_photo.make_rect(r)
         r = f[1].rect[0]  # Selected rectangle
-        image_binary.make(r)
-        image_photo.make(r)
+        image_binary.make_rect(r)
+        image_photo.make_rect(r)
 
         self.assertEqual(np.sum(image_binary._images[0]), 2708)
         self.assertEqual(np.sum(image_binary._images[1]), 6332)

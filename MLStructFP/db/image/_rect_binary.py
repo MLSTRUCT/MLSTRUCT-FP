@@ -6,11 +6,10 @@ Image of the surroundings of a rect.
 
 __all__ = ['RectBinaryImage']
 
-from MLStructFP.db.image._base import BaseImage
-from MLStructFP._types import TYPE_CHECKING, Tuple, Dict, NumberType
+from MLStructFP.db.image._base import BaseImage, TYPE_IMAGE
+from MLStructFP._types import TYPE_CHECKING, Tuple, Dict, Optional, NumberType
 
 from PIL import Image
-import cv2
 import io
 import math
 import matplotlib
@@ -23,6 +22,7 @@ import os
 
 if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
+    from MLStructFP.db._floor import Floor
     from MLStructFP.utils import GeomPoint2D
     from matplotlib.figure import Figure
 
@@ -30,7 +30,6 @@ HIGHLIGHT_RECT = False
 HIGHLIGHT_RECT_COLOR = '#FF0000'
 MAX_STORED_FLOORS = 2
 RECT_COLOR = '#000000'
-TYPE_IMAGE = 'uint8'
 
 assert HIGHLIGHT_RECT_COLOR != HIGHLIGHT_RECT, 'Highlight color must be different'
 INITIAL_BACKEND = matplotlib.get_backend()
@@ -49,8 +48,7 @@ class RectBinaryImage(BaseImage):
             self,
             path: str = '',
             save_images: bool = False,
-            image_size_px: int = 64,
-            crop_length: NumberType = 5.0
+            image_size_px: int = 64
     ) -> None:
         """
         Constructor.
@@ -58,9 +56,8 @@ class RectBinaryImage(BaseImage):
         :param path: Image path
         :param save_images: Save images on path
         :param image_size_px: Image size (width/height), bigger images are expensive, double the width, quad the size
-        :param crop_length: Size of crop from center of the rect to any edge in meters
         """
-        BaseImage.__init__(self, path, save_images, image_size_px, crop_length)
+        BaseImage.__init__(self, path, save_images, image_size_px)
         self._crop_px = int(math.ceil(self._image_size / 32))  # Must be greater or equal than zero
         self._initialized = False
         self._plot = {}  # Store matplotlib figures
@@ -77,15 +74,16 @@ class RectBinaryImage(BaseImage):
         self._initialized = True
         return self
 
-    def _get_floor_plot(self, rect: 'Rect', store: bool) -> Tuple['Figure', 'plt.Axes']:
+    def _get_floor_plot(self, floor: 'Floor', rect: Optional['Rect'], store: bool) -> Tuple['Figure', 'plt.Axes']:
         """
         Get basic figure of wall rects.
 
-        :param rect: Source rect
+        :param floor: Source floor
+        :param rect: Optional rect
         :param store: Store cache of the floor
         :return: Figure of the floor
         """
-        floor_id = str(rect.floor.id)
+        floor_id = str(floor.id)
 
         if floor_id in self._plot.keys():
             return self._plot[floor_id]
@@ -99,10 +97,10 @@ class RectBinaryImage(BaseImage):
         ax.set_aspect(aspect='equal')
         ax.grid(False)  # Don't enable as this may destroy the figures
 
-        for r in rect.floor.rect:
+        for r in floor.rect:
             r.plot_matplotlib(
                 ax=ax,
-                color=RECT_COLOR if rect.id != r.id or not HIGHLIGHT_RECT else HIGHLIGHT_RECT_COLOR
+                color=RECT_COLOR if (rect and rect.id != r.id or not HIGHLIGHT_RECT) else HIGHLIGHT_RECT_COLOR
             )
 
         # Save
@@ -116,32 +114,47 @@ class RectBinaryImage(BaseImage):
             self._plot[floor_id] = (fig, ax)
         return fig, ax
 
-    def make(self, rect: 'Rect') -> int:
+    def make_rect(self, rect: 'Rect', crop_length: NumberType = 5) -> int:
         """
-        Generate image.
+        Generate image for the perimeter of a given rectangle.
 
+        :param rect: Rectangle
+        :param crop_length: Size of crop from center of the rect to any edge in meters
+        :return: Returns the image index on the library array
+        """
+        cr: 'GeomPoint2D' = rect.get_mass_center()
+        return self.make_region(
+            xmin=cr.x - crop_length,
+            xmax=cr.x + crop_length,
+            ymin=cr.y - crop_length,
+            ymax=cr.y + crop_length,
+            floor=rect.floor, rect=rect
+        )
+
+    def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
+                    floor: 'Floor', rect: Optional['Rect'] = None) -> int:
+        """
+        Generate image for a given region.
+
+        :param xmin: Minimum x-axis (m)
+        :param xmax: Maximum x-axis (m)
+        :param ymin: Minimum y-axis (m)
+        :param ymax: Maximum y-axis (m)
+        :param floor: Floor object
+        :param rect: Optional rect for debug
         :return: Returns the image index on the library array
         """
         if not self._initialized:
             raise RuntimeError('Exporter not initialized, use .init()')
         store_matplotlib_figure = not HIGHLIGHT_RECT
-        fig, ax = self._get_floor_plot(rect, store=store_matplotlib_figure)
+        fig, ax = self._get_floor_plot(floor, rect, store=store_matplotlib_figure)
 
         # Set the current figure
         # noinspection PyUnresolvedReferences
         plt.figure(fig.number)
 
         # Save the figure
-        figname = f'{rect.id}'
-
-        # Zoom to rect
-        cr: 'GeomPoint2D' = rect.get_mass_center()
-
-        # Compute crop area
-        xmin = cr.x - self._crop_length
-        xmax = cr.x + self._crop_length
-        ymin = cr.y - self._crop_length
-        ymax = cr.y + self._crop_length
+        figname = f'{rect.id}' if rect else f'{floor.id}-x-{xmin:.2f}-{xmax:.2f}-y-{ymin:.2f}-{ymax:.2f}'
 
         ax.set_xlim(min(xmin, xmax), max(xmin, xmax))
         ax.set_ylim(min(ymin, ymax), max(ymin, ymax))
@@ -197,16 +210,6 @@ class RectBinaryImage(BaseImage):
         # Returns the image index on the library array
         return len(self._images) - 1
 
-    def save_image_id(self, im_id: int, filename: str) -> None:
-        """
-        Save image to file.
-
-        :param im_id: Image ID
-        :param filename: Filename
-        """
-        assert 0 <= im_id < len(self._images), 'Invalid image ID'
-        cv2.imwrite(filename, (1 - self._images[im_id]) * 255)
-
     def close(self) -> None:
         """
         Close and delete all generated figures.
@@ -240,23 +243,6 @@ class RectBinaryImage(BaseImage):
         """
         if plt.get_backend() == 'agg':
             plt.switch_backend(INITIAL_BACKEND)
-
-    def get_file_id(self, filename) -> int:
-        """
-        Returns the index of a given filename.
-
-        :param filename: Name of the file
-        :return: Index on saved list
-        """
-        if filename not in self._names:
-            raise ValueError(f'File <{filename}> have not been processed yet')
-        return self._names.index(filename)
-
-    def get_images(self) -> 'np.ndarray':
-        """
-        :return: Images as numpy ndarray
-        """
-        return np.array(self._images, dtype=TYPE_IMAGE)
 
     def export(self, filename: str, close: bool = True, compressed: bool = True) -> None:
         """

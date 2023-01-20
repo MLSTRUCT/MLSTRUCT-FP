@@ -6,9 +6,9 @@ Image of the true rect photo from the base image plan.
 
 __all__ = ['RectFloorPhoto']
 
-from MLStructFP.db.image._base import BaseImage
+from MLStructFP.db.image._base import BaseImage, TYPE_IMAGE
 from MLStructFP.utils import GeomPoint2D
-from MLStructFP._types import TYPE_CHECKING, Dict, List, Union, Tuple, Optional
+from MLStructFP._types import TYPE_CHECKING, Dict, List, Union, Tuple, Optional, NumberType
 
 import cv2
 import gc
@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 
 IMAGES_TO_CLEAR_MEMORY = 10000
 MAX_STORED_FLOORS = 2
-TYPE_IMAGE = 'uint8'
 
 
 def _im_show(title: str, img: 'np.ndarray') -> None:
@@ -277,7 +276,6 @@ class RectFloorPhoto(BaseImage):
             path: str = '',
             save_images: bool = False,
             image_size_px: int = 64,
-            crop_length: float = 5.0,
             empty_color: int = 0
     ) -> None:
         """
@@ -286,10 +284,9 @@ class RectFloorPhoto(BaseImage):
         :param path: Image path
         :param save_images: Save images on path
         :param image_size_px: Image size (width/height), bigger images are expensive, double the width, quad the size
-        :param crop_length: Size of crop from center of the rect to any edge in meters
         :param empty_color: Empty base color
         """
-        BaseImage.__init__(self, path, save_images, image_size_px, crop_length)
+        BaseImage.__init__(self, path, save_images, image_size_px)
 
         if empty_color != 0:
             print('Using debug mode with different empty color')
@@ -416,25 +413,24 @@ class RectFloorPhoto(BaseImage):
 
         return pixels, pc
 
-    def make(self, rect: 'Rect', **kwargs) -> int:
+    def make_rect(self, rect: 'Rect', crop_length: NumberType = 5) -> int:
         """
-        Generate image.
+        Generate image for the perimeter of a given rectangle.
 
+        :param rect: Rectangle
+        :param crop_length: Size of crop from center of the rect to any edge in meters
         :return: Returns the image index on the library array
         """
+        assert crop_length > 0
         floor = rect.floor
-        image: 'np.ndarray'
-        original_shape: 'GeomPoint2D'
         image, original_shape = self._get_floor_image(floor)
-
-        # Save the figure
-        figname = f'{rect.id}'
 
         # Compute crop area
         sc = floor.image_scale
         sx = floor.mutator_scale_x
         sy = floor.mutator_scale_y
 
+        # Image size in px
         h, w, _ = image.shape
 
         # Original center (non rotated)
@@ -460,31 +456,57 @@ class RectFloorPhoto(BaseImage):
         # Compute the distance to original center and angle
         r = cr.dist(rc2)
         theta = cr.angle(rc2)
+        del rc2
 
         # Create point from current center using radius and computed angle
         cr.x = w / 2 + r * math.cos(theta + math.pi * (1 - floor.mutator_angle / 180))
         cr.y = h / 2 + r * math.sin(theta + math.pi * (1 - floor.mutator_angle / 180))
 
-        cra = cr.clone()
+        if self._verbose:
+            print(f'Processing rect ID <{rect.id}>')
+            ce = GeomPoint2D(w / 2, h / 2)
+            _show_dot_image(image, [ce, cr], [[255, 255, 255], [255, 0, 0]])
 
         # Scale back
         cr.x /= ax
         cr.y /= ay
 
-        # Compute crop bound box
-        xmin = int((cr.x - self._crop_length) * ax)
-        xmax = int((cr.x + self._crop_length) * ax)
-        ymin = int((cr.y - self._crop_length) * ay)
-        ymax = int((cr.y + self._crop_length) * ay)
+        # Create region
+        return self.make_region(
+            xmin=cr.x - crop_length,
+            xmax=cr.x + crop_length,
+            ymin=cr.y - crop_length,
+            ymax=cr.y + crop_length,
+            floor=floor, rect=rect
+        )
 
-        if self._verbose:
-            print(f'Processing rect ID <{rect.id}>')
-            ce = GeomPoint2D(w / 2, h / 2)
-            _show_dot_image(image, [ce, cra], [[255, 255, 255], [255, 0, 0]])
+    def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
+                    floor: 'Floor', rect: Optional['Rect'] = None) -> int:
+        """
+        Generate image for a given region.
+
+        :param xmin: Minimum x-axis (m)
+        :param xmax: Maximum x-axis (m)
+        :param ymin: Minimum y-axis (m)
+        :param ymax: Maximum y-axis (m)
+        :param floor: Floor object
+        :param rect: Optional rect for debug
+        :return: Returns the image index on the library array
+        """
+        # Get the image and scale
+        image: 'np.ndarray' = self._get_floor_image(floor)[0]
+        ax = floor.image_scale / _sgn(floor.mutator_scale_x)
+        ay = floor.image_scale / _sgn(floor.mutator_scale_y)
+        figname = f'{rect.id}' if rect else f'{floor.id}-x-{xmin:.2f}-{xmax:.2f}-y-{ymin:.2f}-{ymax:.2f}'
 
         # Get cropped and resized box
-        out_img: 'np.ndarray' = self._get_crop_image(image, xmin, xmax, ymin, ymax, rect)
-        del rc2, cr
+        out_img: 'np.ndarray' = self._get_crop_image(
+            image=image,
+            x1=int(xmin * ax),
+            x2=int(xmax * ax),
+            y1=int(ymin * ay),
+            y2=int(ymax * ay),
+            rect=rect)
 
         if self._save_images:
             assert self._path != '', 'Path cannot be empty'
@@ -523,7 +545,7 @@ class RectFloorPhoto(BaseImage):
             x2: int,
             y1: int,
             y2: int,
-            rect: 'Rect'
+            rect: Optional['Rect']
     ) -> 'np.ndarray':
         """
         Create crop image.
@@ -567,7 +589,8 @@ class RectFloorPhoto(BaseImage):
                 out_img[dy:dy + ww, dx:dx + hh] = image[y1:_y2, x1:_x2]
             except ValueError as e:
                 print(e)
-                print(f'Shape inconsistency at rect ID <{rect.id}>, Floor ID {rect.floor.id}')
+                if rect is not None:
+                    print(f'Shape inconsistency at rect ID <{rect.id}>, Floor ID {rect.floor.id}')
                 raise RectFloorShapeException()
 
         """
@@ -603,23 +626,6 @@ class RectFloorPhoto(BaseImage):
         del self._names
         self._names = []
         self._processed_images = 0
-
-    def get_file_id(self, filename) -> int:
-        """
-        Returns the index of a given filename.
-
-        :param filename: Name of the file
-        :return: Index on saved list
-        """
-        if filename not in self._names:
-            raise ValueError(f'File <{filename}> have not been processed yet')
-        return self._names.index(filename)
-
-    def get_images(self) -> 'np.ndarray':
-        """
-        :return: Images as numpy ndarray
-        """
-        return np.array(self._images, dtype=TYPE_IMAGE)
 
     def export(self) -> None:
         """

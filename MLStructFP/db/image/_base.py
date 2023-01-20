@@ -4,9 +4,12 @@ MLSTRUCTFP - DB - IMAGE - BASE
 Image of the surroundings of a rect.
 """
 
-__all__ = ['BaseImage']
+__all__ = [
+    'BaseImage',
+    'TYPE_IMAGE'
+]
 
-from MLStructFP._types import TYPE_CHECKING, List, NumberType
+from MLStructFP._types import TYPE_CHECKING, List, NumberType, Optional
 
 import math
 import numpy as np
@@ -16,12 +19,13 @@ if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
     from MLStructFP.db._floor import Floor
 
+TYPE_IMAGE = 'uint8'
+
 
 class BaseImage(object):
     """
     Base dataset image object.
     """
-    _crop_length: NumberType
     _image_size: int
     _images: List['np.ndarray']
     _names: List[str]
@@ -29,24 +33,21 @@ class BaseImage(object):
     _save_images: bool
     save: bool
 
-    def __init__(self, path: str, save_images: bool, image_size_px: int, crop_length: NumberType) -> None:
+    def __init__(self, path: str, save_images: bool, image_size_px: int) -> None:
         """
         Constructor.
 
         :param path: Image path
         :param save_images: Save images on path
         :param image_size_px: Image size (width/height), bigger images are expensive, double the width, quad the size
-        :param crop_length: Size of crop from center of the rect to any edge in meters
         """
         assert image_size_px > 0
-        assert crop_length > 0
         assert math.log(image_size_px, 2).is_integer(), 'Image size must be a power of 2'
 
         if path != '':
             os.makedirs(path, exist_ok=True)
             assert os.path.isdir(path), f'Path <{path}> does not exist'
 
-        self._crop_length = crop_length  # This produces blocks of (2*BOUNDFACTOR x 2*BOUNDFACTOR) size
         self._image_size = image_size_px
         self._images = []
         self._names = []  # List of image names
@@ -55,20 +56,30 @@ class BaseImage(object):
 
         self.save = True
 
-    def make(self, rect: 'Rect') -> int:
+    def make_rect(self, rect: 'Rect', crop_length: NumberType) -> int:
         """
-        Generate image for a given rect.
+        Generate image for the perimeter of a given rectangle.
+
+        :param rect: Rectangle
+        :param crop_length: Size of crop from center of the rect to any edge in meters
+        :return: Returns the image index on the library array
         """
         raise NotImplementedError()
 
-    def make_floor(self, floor: 'Floor') -> None:
+    def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
+                    floor: 'Floor', rect: Optional['Rect'] = None) -> int:
         """
-        Make all rect images from a given floor.
+        Generate image for a given region.
 
+        :param xmin: Minimum x-axis (m)
+        :param xmax: Maximum x-axis (m)
+        :param ymin: Minimum y-axis (m)
+        :param ymax: Maximum y-axis (m)
         :param floor: Floor object
+        :param rect: Optional rect for debug
+        :return: Returns the image index on the library array
         """
-        for r in floor.rect:
-            self.make(r)
+        raise NotImplementedError()
 
     def export(self, *args, **kwargs) -> None:
         """
@@ -81,3 +92,20 @@ class BaseImage(object):
         Close and delete all generated figures.
         """
         raise NotImplementedError()
+
+    def get_images(self) -> 'np.ndarray':
+        """
+        :return: Images as numpy ndarray
+        """
+        return np.array(self._images, dtype=TYPE_IMAGE)
+
+    def get_file_id(self, filename) -> int:
+        """
+        Returns the index of a given filename.
+
+        :param filename: Name of the file
+        :return: Index on saved list
+        """
+        if filename not in self._names:
+            raise ValueError(f'File <{filename}> have not been processed yet')
+        return self._names.index(filename)
