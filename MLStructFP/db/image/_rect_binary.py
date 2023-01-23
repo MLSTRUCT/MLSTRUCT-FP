@@ -114,13 +114,13 @@ class RectBinaryImage(BaseImage):
             self._plot[floor_id] = (fig, ax)
         return fig, ax
 
-    def make_rect(self, rect: 'Rect', crop_length: NumberType = 5) -> int:
+    def make_rect(self, rect: 'Rect', crop_length: NumberType = 5) -> Tuple[int, 'np.ndarray']:
         """
         Generate image for the perimeter of a given rectangle.
 
         :param rect: Rectangle
         :param crop_length: Size of crop from center of the rect to any edge in meters
-        :return: Returns the image index on the library array
+        :return: Returns the image index and matrix
         """
         cr: 'GeomPoint2D' = rect.get_mass_center()
         return self.make_region(
@@ -132,7 +132,7 @@ class RectBinaryImage(BaseImage):
         )
 
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
-                    floor: 'Floor', rect: Optional['Rect'] = None) -> int:
+                    floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
         """
         Generate image for a given region.
 
@@ -142,7 +142,7 @@ class RectBinaryImage(BaseImage):
         :param ymax: Maximum y-axis (m)
         :param floor: Floor object
         :param rect: Optional rect for debug
-        :return: Returns the image index on the library array
+        :return: Returns the image index and matrix
         """
         if not self._initialized:
             raise RuntimeError('Exporter not initialized, use .init()')
@@ -184,15 +184,15 @@ class RectBinaryImage(BaseImage):
             im4.save(filesave, format='PNG')
             # print('Rect {0} saved to {1}'.format(rect.id, filesave))
 
+        # noinspection PyTypeChecker
+        array = np.array(im4, dtype=TYPE_IMAGE)
+
         # Save to array
         if self.save:
-            # noinspection PyTypeChecker
-            array = np.array(im4, dtype=TYPE_IMAGE)
             # array = np.where(array > 0, 0, 1)
             self._images.append(array)
             # self._images.append(array)
             self._names.append(figname)
-            del array
 
         # Close data
         ram.close()
@@ -208,7 +208,7 @@ class RectBinaryImage(BaseImage):
         del im, im2, im3, im4, fig, ax
 
         # Returns the image index on the library array
-        return len(self._images) - 1
+        return len(self._images) - 1, array
 
     def close(self) -> None:
         """

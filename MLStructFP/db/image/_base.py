@@ -9,7 +9,7 @@ __all__ = [
     'TYPE_IMAGE'
 ]
 
-from MLStructFP._types import TYPE_CHECKING, List, NumberType, Optional
+from MLStructFP._types import TYPE_CHECKING, List, NumberType, Optional, Tuple
 
 import math
 import numpy as np
@@ -41,7 +41,7 @@ class BaseImage(object):
         :param save_images: Save images on path
         :param image_size_px: Image size (width/height), bigger images are expensive, double the width, quad the size
         """
-        assert image_size_px > 0
+        assert image_size_px > 0 and isinstance(image_size_px, int)
         assert math.log(image_size_px, 2).is_integer(), 'Image size must be a power of 2'
 
         if path != '':
@@ -56,18 +56,18 @@ class BaseImage(object):
 
         self.save = True
 
-    def make_rect(self, rect: 'Rect', crop_length: NumberType) -> int:
+    def make_rect(self, rect: 'Rect', crop_length: NumberType) -> Tuple[int, 'np.ndarray']:
         """
         Generate image for the perimeter of a given rectangle.
 
         :param rect: Rectangle
         :param crop_length: Size of crop from center of the rect to any edge in meters
-        :return: Returns the image index on the library array
+        :return: Returns the image index and matrix
         """
         raise NotImplementedError()
 
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
-                    floor: 'Floor', rect: Optional['Rect'] = None) -> int:
+                    floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
         """
         Generate image for a given region.
 

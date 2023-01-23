@@ -413,13 +413,13 @@ class RectFloorPhoto(BaseImage):
 
         return pixels, pc
 
-    def make_rect(self, rect: 'Rect', crop_length: NumberType = 5) -> int:
+    def make_rect(self, rect: 'Rect', crop_length: NumberType = 5) -> Tuple[int, 'np.ndarray']:
         """
         Generate image for the perimeter of a given rectangle.
 
         :param rect: Rectangle
         :param crop_length: Size of crop from center of the rect to any edge in meters
-        :return: Returns the image index on the library array
+        :return: Returns the image index and matrix
         """
         assert crop_length > 0
         floor = rect.floor
@@ -481,7 +481,7 @@ class RectFloorPhoto(BaseImage):
         )
 
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
-                    floor: 'Floor', rect: Optional['Rect'] = None) -> int:
+                    floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
         """
         Generate image for a given region.
 
@@ -491,7 +491,7 @@ class RectFloorPhoto(BaseImage):
         :param ymax: Maximum y-axis (m)
         :param floor: Floor object
         :param rect: Optional rect for debug
-        :return: Returns the image index on the library array
+        :return: Returns the image index and matrix
         """
         # Get the image and scale
         image: 'np.ndarray' = self._get_floor_image(floor)[0]
@@ -514,11 +514,10 @@ class RectFloorPhoto(BaseImage):
             cv2.imwrite(filesave, out_img)
 
         # Save to array
+        out_img_rgb = cv2.cvtColor(out_img, cv2.COLOR_BGR2RGB)
         if self.save:
-            out_img_rgb = cv2.cvtColor(out_img, cv2.COLOR_BGR2RGB)
             self._images.append(out_img_rgb)  # Save as rgb
             self._names.append(figname + '-part' + str(self._export_part))
-            del out_img_rgb
 
         self._processed_images += 1
         if self._processed_images % IMAGES_TO_CLEAR_MEMORY == 0:
@@ -528,7 +527,7 @@ class RectFloorPhoto(BaseImage):
         del out_img
 
         # Returns the image index on the library array
-        return len(self._names) - 1  # Images array can change during export
+        return len(self._names) - 1, out_img_rgb  # Images array can change during export
 
     def _get_empty_image(self) -> 'np.ndarray':
         """
