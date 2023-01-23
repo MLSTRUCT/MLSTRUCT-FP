@@ -349,7 +349,7 @@ class RectFloorPhoto(BaseImage):
         :param floor: Floor object
         :return: Image array
         """
-        floor_hash = f'{floor.id}'
+        floor_hash = f'{floor.id}{floor.mutator_angle}{floor.mutator_scale_x}{floor.mutator_scale_y}'
         if floor_hash in self._floor_images.keys():
             return self._floor_images[floor_hash], self._floor_center_d[floor_hash]
 
@@ -381,7 +381,7 @@ class RectFloorPhoto(BaseImage):
         # Flip image
         if floor.mutator_scale_x < 0:
             pixels = cv2.flip(pixels, 1)
-        if floor.mutator_scale_y > 0:
+        if floor.mutator_scale_y < 0:
             pixels = cv2.flip(pixels, 0)
 
         # Transform image due to mutators
@@ -419,16 +419,46 @@ class RectFloorPhoto(BaseImage):
 
         :param rect: Rectangle
         :param crop_length: Size of crop from center of the rect to any edge in meters
-        :return: Returns the image index and matrix
+        :return: Returns the image index on the library array
         """
-        assert crop_length > 0
-        floor = rect.floor
+        return self._make(rect.floor, rect.get_mass_center(), crop_length, crop_length, rect)
+
+    def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
+                    floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
+        """
+        Generate image for a given region.
+
+        :param xmin: Minimum x-axis (image coordinates)
+        :param xmax: Maximum x-axis (image coordinates)
+        :param ymin: Minimum y-axis (image coordinates)
+        :param ymax: Maximum y-axis (image coordinates)
+        :param floor: Floor object
+        :param rect: Optional rect for debug
+        :return: Returns the image index on the library array
+        """
+        assert xmax > xmin and ymax > ymin
+        dx = (xmax - xmin) / 2
+        dy = (ymax - ymin) / 2
+        return self._make(floor, GeomPoint2D(xmin + dx, ymin + dy), dx, dy, rect)
+
+    def _make(self, floor: 'Floor', cr: 'GeomPoint2D', dx: float, dy: float, rect: Optional['Rect']) -> Tuple[int, 'np.ndarray']:
+        """
+        Generate image for a given coordinate (x, y).
+
+        :param floor: Object floor to process
+        :param cr: Coordinate to process
+        :param dx: Half crop distance on x-axis (m)
+        :param dy: Half crop distance on y-axis (m)
+        :param rect: Optional rect
+        :return: Returns the image index on the library array
+        """
+        assert dx > 0 and dy > 0
         image, original_shape = self._get_floor_image(floor)
 
         # Compute crop area
         sc = floor.image_scale
         sx = floor.mutator_scale_x
-        sy = floor.mutator_scale_y
+        sy = -floor.mutator_scale_y
 
         # Image size in px
         h, w, _ = image.shape
@@ -440,8 +470,6 @@ class RectFloorPhoto(BaseImage):
         # Compute true point based on rotation
         ax = sc / _sgn(sx)
         ay = sc / _sgn(sy)
-
-        cr: 'GeomPoint2D' = rect.get_mass_center()
         cr.rotate(GeomPoint2D(), -floor.mutator_angle)
 
         # Scale to pixels
@@ -463,7 +491,8 @@ class RectFloorPhoto(BaseImage):
         cr.y = h / 2 + r * math.sin(theta + math.pi * (1 - floor.mutator_angle / 180))
 
         if self._verbose:
-            print(f'Processing rect ID <{rect.id}>')
+            if rect is not None:
+                print(f'Processing rect ID <{rect.id}>')
             ce = GeomPoint2D(w / 2, h / 2)
             _show_dot_image(image, [ce, cr], [[255, 255, 255], [255, 0, 0]])
 
@@ -472,31 +501,12 @@ class RectFloorPhoto(BaseImage):
         cr.y /= ay
 
         # Create region
-        return self.make_region(
-            xmin=cr.x - crop_length,
-            xmax=cr.x + crop_length,
-            ymin=cr.y - crop_length,
-            ymax=cr.y + crop_length,
-            floor=floor, rect=rect
-        )
+        xmin = cr.x - dx
+        xmax = cr.x + dx
+        ymin = cr.y - dy
+        ymax = cr.y + dy
 
-    def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
-                    floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
-        """
-        Generate image for a given region.
-
-        :param xmin: Minimum x-axis (m)
-        :param xmax: Maximum x-axis (m)
-        :param ymin: Minimum y-axis (m)
-        :param ymax: Maximum y-axis (m)
-        :param floor: Floor object
-        :param rect: Optional rect for debug
-        :return: Returns the image index and matrix
-        """
-        # Get the image and scale
         image: 'np.ndarray' = self._get_floor_image(floor)[0]
-        ax = floor.image_scale / _sgn(floor.mutator_scale_x)
-        ay = floor.image_scale / _sgn(floor.mutator_scale_y)
         figname = f'{rect.id}' if rect else f'{floor.id}-x-{xmin:.2f}-{xmax:.2f}-y-{ymin:.2f}-{ymax:.2f}'
 
         # Get cropped and resized box

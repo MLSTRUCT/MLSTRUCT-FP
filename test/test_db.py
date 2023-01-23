@@ -32,8 +32,8 @@ class DbLoaderTest(unittest.TestCase):
         self.assertEqual(len(f.slab), 1)
         self.assertAlmostEqual(f.bounding_box.xmin, 1.08599, places=3)
         self.assertAlmostEqual(f.bounding_box.xmax, 49.24599, places=3)
-        self.assertAlmostEqual(f.bounding_box.ymin, 11.07863, places=3)
-        self.assertAlmostEqual(f.bounding_box.ymax, 24.69863, places=3)
+        self.assertAlmostEqual(f.bounding_box.ymin, -24.69863, places=3)
+        self.assertAlmostEqual(f.bounding_box.ymax, -11.07863, places=3)
 
         # Check rectangle data
         r = f.rect[0]
@@ -41,7 +41,7 @@ class DbLoaderTest(unittest.TestCase):
         self.assertEqual(r.floor.id, 302)
         mc = r.get_mass_center()
         self.assertAlmostEqual(mc.x, 1.1659, places=3)
-        self.assertAlmostEqual(mc.y, 22.13863, places=3)
+        self.assertAlmostEqual(mc.y, -22.13863, places=3)
         self.assertEqual(len(r.points), 4)
 
         # Check image
@@ -64,11 +64,11 @@ class DbLoaderTest(unittest.TestCase):
         self.assertEqual(f.mutator_angle, 0)
         self.assertEqual(f.mutator_scale_x, 1)
         self.assertEqual(f.mutator_scale_y, 1)
-        test(83.1, 6.3)
+        test(83.1, -6.3)
 
         # Test rotation
         f.mutate(45)
-        test(54.3, 63.2)
+        test(63.2, 54.3)
         self.assertNotEqual(bb, f.bounding_box)
 
         # Rollback angle
@@ -76,21 +76,21 @@ class DbLoaderTest(unittest.TestCase):
         bb2 = f.bounding_box
         self.assertAlmostEqual(bb.xmin, bb2.xmin)
         self.assertAlmostEqual(bb.ymin, bb2.ymin)
-        test(83.1, 6.3)
+        test(83.1, -6.3)
 
         # Test scale
         f.mutate(0, -1)
-        test(-83.1, 6.3)
+        test(-83.1, -6.3)
         f.mutate(0, 1, -1)
-        test(83.1, -6.3)
+        test(83.1, 6.3)
 
         # Test rotate and scale
         f.mutate(60, -1, 0.65)
-        test(-45.1, -69.9)
+        test(-38, -74)
 
         # Rollback
         f.mutate()
-        test(83.1, 6.3)
+        test(83.1, -6.3)
 
     def test_image(self) -> None:
         """
@@ -112,4 +112,4 @@ class DbLoaderTest(unittest.TestCase):
         self.assertEqual(np.sum(image_binary._images[1]), 6332)
 
         self.assertEqual(np.sum(image_photo._images[0]), 284580)
-        self.assertEqual(np.sum(image_photo._images[1]), 993110)
+        self.assertEqual(np.sum(image_photo._images[1]), 925600)
