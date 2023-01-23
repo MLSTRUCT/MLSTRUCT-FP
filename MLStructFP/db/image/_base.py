@@ -77,7 +77,7 @@ class BaseImage(object):
         :param ymax: Maximum y-axis (m)
         :param floor: Floor object
         :param rect: Optional rect for debug
-        :return: Returns the image index on the library array
+        :return: Returns the image index and matrix
         """
         raise NotImplementedError()
 
