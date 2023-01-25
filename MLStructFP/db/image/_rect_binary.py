@@ -243,25 +243,3 @@ class RectBinaryImage(BaseImage):
         """
         if plt.get_backend() == 'agg':
             plt.switch_backend(INITIAL_BACKEND)
-
-    def export(self, filename: str, close: bool = True, compressed: bool = True) -> None:
-        """
-        Export saved images to numpy format and remove all data.
-
-        :param filename: File to export
-        :param close: Close after export
-        :param compressed: Save compressed file
-        """
-        assert len(self._images) > 0, 'Exporter cannot be empty'
-        filename += f'_{self._image_size}'
-        if compressed:
-            np.savez_compressed(filename, data=self.get_images())  # .npz
-        else:
-            np.save(filename, self.get_images())  # .npy
-        imnames = open(filename + '_files.csv', 'w', encoding='utf-8')
-        imnames.write('ID,File\n')
-        for i in range(len(self._names)):
-            imnames.write(f'{i},{self._names[i]}\n')
-        imnames.close()
-        if close:
-            self.close()

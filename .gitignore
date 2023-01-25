@@ -19,6 +19,7 @@ dataset-*.zip
 
 # Other
 _dev_*
-.db/
 .old
+.out
 ~$*
+test/.out
