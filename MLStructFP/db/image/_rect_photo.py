@@ -279,9 +279,6 @@ class RectFloorPhoto(BaseImage):
         :param empty_color: Empty base color. If -1, disable empty replace color
         """
         BaseImage.__init__(self, path, save_images, image_size_px)
-
-        if empty_color != -1:
-            print('Using debug mode with different empty color')
         assert -1 <= empty_color <= 255
 
         self._empty_color = empty_color  # Color to replace empty data
