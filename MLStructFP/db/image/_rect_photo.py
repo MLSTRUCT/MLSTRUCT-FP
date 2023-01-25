@@ -276,7 +276,7 @@ class RectFloorPhoto(BaseImage):
             path: str = '',
             save_images: bool = False,
             image_size_px: int = 64,
-            empty_color: int = 0
+            empty_color: int = -1
     ) -> None:
         """
         Constructor.
@@ -284,15 +284,15 @@ class RectFloorPhoto(BaseImage):
         :param path: Image path
         :param save_images: Save images on path
         :param image_size_px: Image size (width/height), bigger images are expensive, double the width, quad the size
-        :param empty_color: Empty base color
+        :param empty_color: Empty base color. If -1, disable empty replace color
         """
         BaseImage.__init__(self, path, save_images, image_size_px)
 
-        if empty_color != 0:
+        if empty_color != -1:
             print('Using debug mode with different empty color')
-        assert 0 <= empty_color <= 255
+        assert -1 <= empty_color <= 255
 
-        self._empty_color = empty_color
+        self._empty_color = empty_color  # Color to replace empty data
         self._export_compressed = False  # Export as a compressed numpy file
         self._export_current = 0  # Total exported projects
         self._export_each = 0  # Export each N finished projects
@@ -359,7 +359,7 @@ class RectFloorPhoto(BaseImage):
 
         # Make default empty color
         pixels: 'np.ndarray'
-        if self._empty_color != 0:
+        if self._empty_color >= 0:
             image = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
 
             # make mask of where the transparent bits are

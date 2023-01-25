@@ -112,4 +112,4 @@ class DbLoaderTest(unittest.TestCase):
         self.assertEqual(np.sum(image_binary._images[1]), 6332)
 
         self.assertEqual(np.sum(image_photo._images[0]), 284580)
-        self.assertEqual(np.sum(image_photo._images[1]), 925600)
+        self.assertEqual(np.sum(image_photo._images[1]), 883326)
