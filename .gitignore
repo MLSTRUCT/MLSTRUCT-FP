@@ -1,9 +1,9 @@
 # Cache
-__pycache__
+__pycache__/
 
 # IDE
-.idea
-.vscode
+.idea/
+.vscode/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -20,5 +20,5 @@ dataset-*.zip
 # Other
 _dev_*
 .db/
-.old
+.old/
 ~$*

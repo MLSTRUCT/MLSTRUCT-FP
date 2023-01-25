@@ -23,12 +23,6 @@ requirements = [
     'six == 1.16.0'
 ]
 
-requirements_tests = requirements.copy()
-requirements_tests.extend([
-    'codecov',
-    'nose2'
-])
-
 # Setup library
 setup(
     author=MLStructFP.__author__,
@@ -48,7 +42,7 @@ setup(
     include_package_data=True,
     install_requires=requirements,
     extras_require={
-        'test': requirements_tests
+        'test': ['codecov', 'nose2']
     },
     keywords=MLStructFP.__keywords__,
     name='MLStructFP',
