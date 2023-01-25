@@ -222,17 +222,10 @@ class RectBinaryImage(BaseImage):
             fig, _ = self._plot[f]
             plt.close(fig)
 
-        # Remove plots
-        del self._plot
-        self._plot = {}
-
-        # Remove images
-        del self._images
-        self._images = []
-
-        # Remove names
-        del self._names
-        self._names = []
+        # Remove
+        self._plot.clear()
+        self._images.clear()
+        self._names.clear()
 
         self._initialized = False
 

@@ -586,15 +586,11 @@ class RectFloorPhoto(BaseImage):
         """
         Close and delete all generated figures.
         """
-        del self._names
-        self._names = []
+        self._names.clear()
         self._processed_images = 0
-        del self._images
-        self._images = []
-        del self._floor_images
-        self._floor_images = {}
-        del self._floor_center_d
-        self._floor_center_d = {}
+        self._images.clear()
+        self._floor_images.clear()
+        self._floor_center_d.clear()
         gc.collect()
 
 
