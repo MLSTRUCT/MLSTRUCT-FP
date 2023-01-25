@@ -15,7 +15,6 @@ import gc
 import math
 import numpy as np
 import os
-import time
 
 if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
@@ -258,17 +257,10 @@ class RectFloorPhoto(BaseImage):
     Floor rect photo.
     """
     _empty_color: int
-    _export_compressed: bool
-    _export_current: int
-    _export_each: int
-    _export_filename: str
-    _export_init: bool
-    _export_part: int
-    _export_total: int
-    _export_total_last: int
     _floor_center_d: Dict[str, 'GeomPoint2D']  # No rotation image size in pixels
     _floor_images: Dict[str, 'np.ndarray']
     _kernel: 'np.ndarray'
+    _processed_images: int
     _verbose: bool
 
     def __init__(
@@ -276,7 +268,7 @@ class RectFloorPhoto(BaseImage):
             path: str = '',
             save_images: bool = False,
             image_size_px: int = 64,
-            empty_color: int = 0
+            empty_color: int = -1
     ) -> None:
         """
         Constructor.
@@ -284,23 +276,12 @@ class RectFloorPhoto(BaseImage):
         :param path: Image path
         :param save_images: Save images on path
         :param image_size_px: Image size (width/height), bigger images are expensive, double the width, quad the size
-        :param empty_color: Empty base color
+        :param empty_color: Empty base color. If -1, disable empty replace color
         """
         BaseImage.__init__(self, path, save_images, image_size_px)
+        assert -1 <= empty_color <= 255
 
-        if empty_color != 0:
-            print('Using debug mode with different empty color')
-        assert 0 <= empty_color <= 255
-
-        self._empty_color = empty_color
-        self._export_compressed = False  # Export as a compressed numpy file
-        self._export_current = 0  # Total exported projects
-        self._export_each = 0  # Export each N finished projects
-        self._export_filename = ''  # Export filename target
-        self._export_init = False  # Export has been initialized
-        self._export_part = 1  # Actual part
-        self._export_total = 0  # Total projects to be exported
-        self._export_total_last = 0  # Number of total projects evaluated after last export
+        self._empty_color = empty_color  # Color to replace empty data
         self._processed_images = 0
         self._verbose = False
 
@@ -315,32 +296,6 @@ class RectFloorPhoto(BaseImage):
         # Store loaded images
         self._floor_images = {}
         self._floor_center_d = {}
-
-    def configure_export(
-            self,
-            filename: str,
-            save_each: int,
-            save_total: int,
-            export_compressed: bool
-    ) -> None:
-        """
-        Configure export
-
-        :param filename: Export filename
-        :param save_each: Export each N projects
-        :param save_total: Total projects to be exported
-        :param export_compressed: Export as a compressed .npz file
-        """
-        if self._export_init:
-            raise RuntimeError('Exporter already configured')
-        assert save_each >= 1
-        assert save_each < save_total
-        self._export_compressed = export_compressed
-        self._export_init = True
-        self._export_filename = filename
-        self._export_each = save_each
-        self._export_total = save_total
-        self.save = True
 
     def _get_floor_image(self, floor: 'Floor') -> Tuple['np.ndarray', 'GeomPoint2D']:
         """
@@ -359,7 +314,7 @@ class RectFloorPhoto(BaseImage):
 
         # Make default empty color
         pixels: 'np.ndarray'
-        if self._empty_color != 0:
+        if self._empty_color >= 0:
             image = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
 
             # make mask of where the transparent bits are
@@ -527,7 +482,7 @@ class RectFloorPhoto(BaseImage):
         out_img_rgb = cv2.cvtColor(out_img, cv2.COLOR_BGR2RGB)
         if self.save:
             self._images.append(out_img_rgb)  # Save as rgb
-            self._names.append(figname + '-part' + str(self._export_part))
+            self._names.append(figname)
 
         self._processed_images += 1
         if self._processed_images % IMAGES_TO_CLEAR_MEMORY == 0:
@@ -597,10 +552,9 @@ class RectFloorPhoto(BaseImage):
             try:
                 out_img[dy:dy + ww, dx:dx + hh] = image[y1:_y2, x1:_x2]
             except ValueError as e:
-                print(e)
                 if rect is not None:
                     print(f'Shape inconsistency at rect ID <{rect.id}>, Floor ID {rect.floor.id}')
-                raise RectFloorShapeException()
+                raise RectFloorShapeException(str(e))
 
         """
         Good:       INTER_AREA
@@ -632,56 +586,15 @@ class RectFloorPhoto(BaseImage):
         """
         Close and delete all generated figures.
         """
-        del self._names
-        self._names = []
+        self._names.clear()
         self._processed_images = 0
-
-    def export(self) -> None:
-        """
-        Call to export parts, if the current part is greater than export each or the current project
-        is the last save to file.
-        """
-        if not self._export_init:
-            raise RuntimeError('Exporter has not been configured yet')
-        assert len(self._images) > 0, 'Exporter cannot be empty'
-
-        # Add project
-        self._export_current += 1
-        self._export_total_last += 1
-        if not (self._export_total_last >= self._export_each or self._export_current == self._export_total):
-            return
-
-        # Export images
-        filename = self._export_filename + f'_{self._image_size}_part{self._export_part}'
-        self._export_part += 1
-        self._export_total_last = 0
-        if self._export_compressed:
-            np.savez_compressed(filename, data=self.get_images())  # .npz
-        else:
-            np.save(filename, self.get_images())  # .npy
-
-        # Export names
-        imnames = open(self._export_filename + f'_{self._image_size}_files.csv', 'w', encoding='utf-8')
-        imnames.write('ID,File\n')
-        for i in range(len(self._names)):
-            imnames.write(f'{i},{self._names[i]}\n')
-        imnames.close()
-
-        # Clear memory
-        del self._images
-        self._images = []
-        del self._floor_images
-        self._floor_images = {}
-        del self._floor_center_d
-        self._floor_center_d = {}
+        self._images.clear()
+        self._floor_images.clear()
+        self._floor_center_d.clear()
         gc.collect()
-        time.sleep(2)
 
 
 class RectFloorShapeException(Exception):
     """
     Custom exception from rect floor generation image.
     """
-
-    def __init__(self) -> None:
-        Exception.__init__(self)

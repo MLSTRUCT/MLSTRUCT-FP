@@ -112,4 +112,15 @@ class DbLoaderTest(unittest.TestCase):
         self.assertEqual(np.sum(image_binary._images[1]), 6332)
 
         self.assertEqual(np.sum(image_photo._images[0]), 284580)
-        self.assertEqual(np.sum(image_photo._images[1]), 925600)
+        self.assertEqual(np.sum(image_photo._images[1]), 883326)
+
+        # Export
+        if not os.path.isdir('.out'):
+            os.mkdir('.out')
+        image_binary.export('.out/binary')
+        image_photo.export('.out/photo')
+
+        # Now exporters must be closed
+        self.assertEqual(len(image_binary.get_images()), 0)
+        self.assertEqual(len(image_photo.get_images()), 0)
+        image_binary.restore_plot()
