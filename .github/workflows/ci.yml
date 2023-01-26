@@ -23,6 +23,7 @@ jobs:
     with:
       cache-dependency-path: '**/setup.py'
       env-vars: GITHUB=true
+      install-extras: test
       os: ${{ matrix.os }}
       python-version: 3.8
 
