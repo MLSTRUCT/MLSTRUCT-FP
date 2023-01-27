@@ -7,6 +7,7 @@ Image of the surroundings of a rect.
 __all__ = ['RectBinaryImage']
 
 from MLStructFP.db.image._base import BaseImage, TYPE_IMAGE
+from MLStructFP.utils import make_dirs
 from MLStructFP._types import TYPE_CHECKING, Tuple, Dict, Optional, NumberType
 
 from PIL import Image
@@ -112,6 +113,7 @@ class RectBinaryImage(BaseImage):
                 plt.close(f1)  # Close the figure
                 del self._plot[k1]  # Remove
             self._plot[floor_id] = (fig, ax)
+
         return fig, ax
 
     def make_rect(self, rect: 'Rect', crop_length: NumberType = 5) -> Tuple[int, 'np.ndarray']:
@@ -181,6 +183,7 @@ class RectBinaryImage(BaseImage):
         if self._save_images:
             assert self._path != '', 'Path cannot be empty'
             filesave = os.path.join(self._path, figname + '.png')
+            make_dirs(filesave)
             im4.save(filesave, format='PNG')
             # print('Rect {0} saved to {1}'.format(rect.id, filesave))
 

@@ -10,6 +10,7 @@ __all__ = [
 ]
 
 from MLStructFP._types import TYPE_CHECKING, List, NumberType, Optional, Tuple
+from MLStructFP.utils import make_dirs
 
 import math
 import numpy as np
@@ -45,7 +46,7 @@ class BaseImage(object):
         assert math.log(image_size_px, 2).is_integer(), 'Image size must be a power of 2'
 
         if path != '':
-            os.makedirs(path, exist_ok=True)
+            make_dirs(path)
             assert os.path.isdir(path), f'Path <{path}> does not exist'
 
         self._image_size = image_size_px
@@ -91,6 +92,7 @@ class BaseImage(object):
         """
         assert len(self._images) > 0, 'Exporter cannot be empty'
         filename += f'_{self._image_size}'
+        make_dirs(filename)
         if compressed:
             np.savez_compressed(filename, data=self.get_images())  # .npz
         else:
