@@ -1,2 +1,4 @@
 ignore:
+  - "build.py"
+  - "setup.py"
   - "test/*.py"
