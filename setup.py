@@ -42,7 +42,7 @@ setup(
     include_package_data=True,
     install_requires=requirements,
     extras_require={
-        'test': ['codecov', 'nose2']
+        'test': ['nose2[coverage_plugin]']
     },
     keywords=MLStructFP.__keywords__,
     name='MLStructFP',
