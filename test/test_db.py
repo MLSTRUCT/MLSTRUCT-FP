@@ -22,6 +22,7 @@ class DbLoaderTest(unittest.TestCase):
         """
         db = DbLoader(DB_PATH)
         self.assertEqual(os.path.dirname(DB_PATH), db._path)
+        db.tabulate()
 
         # Test floors
         self.assertEqual(len(db.floor), 7)
