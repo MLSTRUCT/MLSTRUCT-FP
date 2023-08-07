@@ -13,7 +13,9 @@ from MLStructFP._types import Tuple
 
 import json
 import os
+import tabulate
 
+from IPython.display import HTML, display
 from pathlib import Path
 from typing import Dict
 
@@ -72,5 +74,22 @@ class DbLoader(object):
                 )
 
     @property
-    def floors(self) -> Tuple['Floor']:
+    def floors(self) -> Tuple['Floor', ...]:
+        # noinspection PyTypeChecker
         return tuple(self.floor.values())
+
+    def tabulate(self) -> None:
+        """
+        Tabulates each floor, with their file and number of rects.
+        """
+        table = [['#', 'Floor ID', 'No. rects', 'Floor image path']]
+        for j in range(len(self.floors)):
+            f = self.floors[j]
+            table.append([j, f.id, len(f.rect), f.image_path])
+        display(HTML(tabulate.tabulate(
+            table,
+            headers='firstrow',
+            numalign='center',
+            stralign='center',
+            tablefmt='html'
+        )))
