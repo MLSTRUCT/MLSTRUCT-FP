@@ -134,9 +134,9 @@ Note the dataset comprises a list of "rect" representing the rectangles (wall se
 "slab" and "floor". Each item has a distinct ID for quering and grouping elements. In the example,
 the rect ID ``1000393`` is within floor ID ``8970646``, with an angle of ``0`` degrees, a length
 of ``2.6 m``, and within the wall ID ``5969311``. Likewise, the slab ``1002588`` is within floor
-ID ``5980221``, whose its first point (x, y) is ``(-1.153, -22.622)`` m. Finally, the floor ID
-``1014539`` is associated with the image ``83d...8b7c.png`` and a scale ``193.412`` px/m. In total,
-there are 70873 rects, 954 slabs and 954 floors.
+ID ``5980221``, whose its first point (x, y) is ``(-1.153, -22.622) m``. Finally, the floor ID
+``1014539`` is associated with the image ``83d...8b7c.png`` and a scale ``193.412 px/m``. In total,
+there are ``70873`` rects, ``954`` slabs and ``954`` floors.
 
 
 Object API
