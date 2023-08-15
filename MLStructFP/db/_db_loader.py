@@ -78,14 +78,19 @@ class DbLoader(object):
         # noinspection PyTypeChecker
         return tuple(self.floor.values())
 
-    def tabulate(self) -> None:
+    def tabulate(self, limit: int = 0) -> None:
         """
         Tabulates each floor, with their file and number of rects.
+
+        :param limit: Limit the number of items
         """
+        assert isinstance(limit, int) and limit >= 0, 'Limit must be an integer greater or equal than zero'
         table = [['#', 'Floor ID', 'No. rects', 'Floor image path']]
         for j in range(len(self.floors)):
             f = self.floors[j]
             table.append([j, f.id, len(f.rect), f.image_path])
+            if 0 < limit - 1 <= j:
+                break
         display(HTML(tabulate.tabulate(
             table,
             headers='firstrow',
