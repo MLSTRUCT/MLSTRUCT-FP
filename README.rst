@@ -38,6 +38,8 @@ scaling.
 The images can be generated from the real rasterized plan, or by using the polygons stored in the
 JSON file. Both image and wall polygons are consistent in their placement.
 
+See more information in our `published article <https://doi.org/10.1016/j.autcon.2023.105132>`_.
+
 
 First steps
 -----------
@@ -207,6 +209,25 @@ rectangle as origin.
 .. image:: docs/example-rects.png
   :width: 640
   :alt: Example plot
+
+
+Citing
+------
+
+.. code-block:: tex
+    @article{Pizarro2023,
+        title = {Large-scale multi-unit floor plan dataset for architectural plan analysis and recognition},
+        journal = {Automation in Construction},
+        volume = {156},
+        pages = {105132},
+        year = {2023},
+        issn = {0926-5805},
+        doi = {https://doi.org/10.1016/j.autcon.2023.105132},
+        url = {https://www.sciencedirect.com/science/article/pii/S0926580523003928},
+        author = {Pablo N. Pizarro and Nancy Hitschfeld and Ivan Sipiran},
+        keywords = {Floor plan dataset, Floor plan analysis, Wall vectorization, Wall segmentation, Image processing, Deep machine learning},
+        abstract = {Among automatic floor plan analysis, data-driven methods have become increasingly popular in recent years because of their superior accuracy and generalizability compared to traditional approaches while processing rasterized floor plans. However, the scarcity of public raster datasets with various styles and sufficient quantity hinders the development of new models, as current ones only contain a single apartment or house, limiting the analysis of large-scale plans usually designed in architectural and structural offices. In order to address that issue, this paper presents a multi-unit floor plan dataset comprising 954 high-resolution images of residential buildings with annotated walls and slabs as polygons, enabling large-scale plan analysis. Additionally, this study implements an automatic wall vectorization method that uses a learning discriminative-based semantic segmentation U-Net model to retrieve wall objects, followed by a deep-learning model that predicts the segmented primitives, providing a baseline for future comparison of automatic wall segmentation results.}
+    }
 
 
 Author
