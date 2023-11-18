@@ -84,7 +84,7 @@ class BaseImage(object):
 
     def export(self, filename: str, close: bool = True, compressed: bool = True) -> None:
         """
-        Export saved images to numpy format and remove all data.
+        Export saved images to numpy format and then removes all data.
 
         :param filename: File to export
         :param close: Close after export

@@ -52,10 +52,12 @@ class Floor(object):
 
     @property
     def rect(self) -> Tuple['Rect']:
+        # noinspection PyTypeChecker
         return tuple(self._rect.values())
 
     @property
     def slab(self) -> Tuple['Slab']:
+        # noinspection PyTypeChecker
         return tuple(self._slab.values())
 
     def plot_basic(self) -> 'go.Figure':
