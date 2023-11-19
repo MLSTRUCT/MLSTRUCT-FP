@@ -183,8 +183,7 @@ class RectBinaryImage(BaseImage):
         if self._save_images:
             assert self._path != '', 'Path cannot be empty'
             filesave = os.path.join(self._path, figname + '.png')
-            make_dirs(filesave)
-            im4.save(filesave, format='PNG')
+            im4.save(make_dirs(filesave), format='PNG')
             # print('Rect {0} saved to {1}'.format(rect.id, filesave))
 
         # noinspection PyTypeChecker
