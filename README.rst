@@ -31,7 +31,7 @@ Description
 
 This repo contains the base library to load and parse floor plans from MLSTRUCT-FP dataset, which
 contains over 954 large-scale floor plans images, alongside annotations for their walls in JSON
-format. The database loader just loads in memory the Floor, Walls, and Slabs objects, and also
+format. The database loader just loads in memory the Floor, Walls, and Slab' objects, and also
 offers methods to create custom images from floor plans by applying a crop, a rotation, and custom
 scaling.
 
