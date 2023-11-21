@@ -315,14 +315,16 @@ class RectFloorPhoto(BaseImage):
         # Make default empty color
         pixels: 'np.ndarray'
         if self._empty_color >= 0:
-            image = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
+            image: 'np.ndarray' = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
+            if image.shape[2] == 4:
+                # make mask of where the transparent bits are
+                trans_mask = image[:, :, 3] == 0
 
-            # make mask of where the transparent bits are
-            trans_mask = image[:, :, 3] == 0
-
-            # replace areas of transparency with white and not transparent
-            image[trans_mask] = [self._empty_color, self._empty_color, self._empty_color, 255]
-            pixels = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+                # replace areas of transparency with white and not transparent
+                image[trans_mask] = [self._empty_color, self._empty_color, self._empty_color, 255]
+                pixels = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+            else:
+                pixels = 255 - image
         else:
             pixels = cv2.imread(ip)
 
@@ -331,7 +333,9 @@ class RectFloorPhoto(BaseImage):
                 image = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
                 trans_mask = image[:, :, 3] == 0
                 image[trans_mask] = [255, 255, 255, 255]  # Turn all black to white to invert
-                pixels = 255 - cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)  # Invert colors
+            else:
+                image = pixels
+            pixels = 255 - cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)  # Invert colors
 
         # Flip image
         if floor.mutator_scale_x < 0:
