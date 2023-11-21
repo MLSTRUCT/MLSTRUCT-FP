@@ -259,6 +259,7 @@ class RectFloorPhoto(BaseImage):
     _empty_color: int
     _floor_center_d: Dict[str, 'GeomPoint2D']  # No rotation image size in pixels
     _floor_images: Dict[str, 'np.ndarray']
+    _invert: bool
     _kernel: 'np.ndarray'
     _processed_images: int
     _verbose: bool
@@ -268,7 +269,8 @@ class RectFloorPhoto(BaseImage):
             path: str = '',
             save_images: bool = False,
             image_size_px: int = 64,
-            empty_color: int = -1
+            empty_color: int = -1,
+            invert: bool = False
     ) -> None:
         """
         Constructor.
@@ -277,11 +279,14 @@ class RectFloorPhoto(BaseImage):
         :param save_images: Save images on path
         :param image_size_px: Image size (width/height), bigger images are expensive, double the width, quad the size
         :param empty_color: Empty base color. If -1, disable empty replace color
+        :param invert: Invert color
         """
         BaseImage.__init__(self, path, save_images, image_size_px)
         assert -1 <= empty_color <= 255
+        assert isinstance(invert, bool)
 
         self._empty_color = empty_color  # Color to replace empty data
+        self._invert = invert
         self._processed_images = 0
         self._verbose = False
 
@@ -307,7 +312,6 @@ class RectFloorPhoto(BaseImage):
         floor_hash = f'{floor.id}{floor.mutator_angle}{floor.mutator_scale_x}{floor.mutator_scale_y}'
         if floor_hash in self._floor_images.keys():
             return self._floor_images[floor_hash], self._floor_center_d[floor_hash]
-
         ip = floor.image_path
         if self._verbose:
             print(f'Loading image: {ip}')
@@ -317,14 +321,14 @@ class RectFloorPhoto(BaseImage):
         if self._empty_color >= 0:
             image: 'np.ndarray' = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
             if image.shape[2] == 4:
-                # make mask of where the transparent bits are
+                # Make mask of where the transparent bits are
                 trans_mask = image[:, :, 3] == 0
 
-                # replace areas of transparency with white and not transparent
+                # Replace areas of transparency with white and not transparent
                 image[trans_mask] = [self._empty_color, self._empty_color, self._empty_color, 255]
                 pixels = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
             else:
-                pixels = 255 - image
+                pixels = image
         else:
             pixels = cv2.imread(ip)
 
@@ -333,9 +337,9 @@ class RectFloorPhoto(BaseImage):
                 image = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
                 trans_mask = image[:, :, 3] == 0
                 image[trans_mask] = [255, 255, 255, 255]  # Turn all black to white to invert
-            else:
-                image = pixels
-            pixels = 255 - cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)  # Invert colors
+                pixels = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
+        if self._invert:
+            pixels = 255 - pixels
 
         # Flip image
         if floor.mutator_scale_x < 0:
