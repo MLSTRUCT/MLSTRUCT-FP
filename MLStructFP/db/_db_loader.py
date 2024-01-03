@@ -85,10 +85,10 @@ class DbLoader(object):
         :param limit: Limit the number of items
         """
         assert isinstance(limit, int) and limit >= 0, 'Limit must be an integer greater or equal than zero'
-        table = [['#', 'Floor ID', 'No. rects', 'Floor image path']]
+        table = [['#', 'Floor ID', 'No. rects', 'No. slabs', 'Floor image path']]
         for j in range(len(self.floors)):
-            f = self.floors[j]
-            table.append([j, f.id, len(f.rect), f.image_path])
+            f: 'Floor' = self.floors[j]
+            table.append([j, f.id, len(f.rect), len(f.slab), f.image_path])
             if 0 < limit - 1 <= j:
                 break
         display(HTML(tabulate.tabulate(
