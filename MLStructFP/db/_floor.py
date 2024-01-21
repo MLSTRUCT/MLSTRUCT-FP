@@ -30,14 +30,16 @@ class Floor(object):
     id: int
     image_path: str
     image_scale: float
+    project_id: int
 
-    def __init__(self, floor_id: int, image_path: str, image_scale: NumberType) -> None:
+    def __init__(self, floor_id: int, image_path: str, image_scale: NumberType, project_id: int = -1) -> None:
         """
         Constructor.
 
         :param floor_id: Floor ID
         :param image_path: Image path
         :param image_scale: Image scale (px to units)
+        :param project_id: Project ID (default: -1)
         """
         assert isinstance(floor_id, int) and floor_id > 0
         assert os.path.isfile(image_path), f'Image file {image_path} does not exist'
@@ -45,6 +47,7 @@ class Floor(object):
         self.id = floor_id
         self.image_path = image_path
         self.image_scale = float(image_scale)
+        self.project_id = project_id
         self._bb = None
         self._last_mutation = None
         self._rect = {}

@@ -42,14 +42,15 @@ class DbLoader(object):
 
             # Assemble objects
             for f_id in data['floor']:
-                f_data = data['floor'][f_id]
+                f_data: dict = data['floor'][f_id]
                 self.floor[int(f_id)] = Floor(
                     floor_id=int(f_id),
                     image_path=os.path.join(self._path, f_data['image']),
-                    image_scale=f_data['scale']
+                    image_scale=f_data['scale'],
+                    project_id=f_data['project'] if 'project' in f_data else -1
                 )
             for rect_id in data['rect']:
-                rect_data = data['rect'][rect_id]
+                rect_data: dict = data['rect'][rect_id]
                 rect_a = rect_data['angle']
                 Rect(
                     rect_id=int(rect_id),
@@ -65,7 +66,7 @@ class DbLoader(object):
                     line_theta=rect_data['line'][2]  # Theta
                 )
             for slab_id in data['slab']:
-                slab_data = data['slab'][slab_id]
+                slab_data: dict = data['slab'][slab_id]
                 Slab(
                     slab_id=int(slab_id),
                     floor=self.floor[slab_data['floorID']],
@@ -78,17 +79,28 @@ class DbLoader(object):
         # noinspection PyTypeChecker
         return tuple(self.floor.values())
 
-    def tabulate(self, limit: int = 0) -> None:
+    def tabulate(self, limit: int = 0, show_project_id: bool = False) -> None:
         """
         Tabulates each floor, with their file and number of rects.
 
         :param limit: Limit the number of items
+        :param show_project_id: Show project ID (if exists)
         """
         assert isinstance(limit, int) and limit >= 0, 'Limit must be an integer greater or equal than zero'
-        table = [['#', 'Floor ID', 'No. rects', 'No. slabs', 'Floor image path']]
+        theads = ['#']
+        if show_project_id:
+            theads.append('Project ID')
+        for t in ('Floor ID', 'No. rects', 'No. slabs', 'Floor image path'):
+            theads.append(t)
+        table = [theads]
         for j in range(len(self.floors)):
             f: 'Floor' = self.floors[j]
-            table.append([j, f.id, len(f.rect), len(f.slab), f.image_path])
+            table_data = [j]
+            if show_project_id:
+                table_data.append(f.project_id)
+            for i in (f.id, len(f.rect), len(f.slab), f.image_path):
+                table_data.append(i)
+            table.append(table_data)
             if 0 < limit - 1 <= j:
                 break
         display(HTML(tabulate.tabulate(
