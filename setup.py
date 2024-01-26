@@ -14,15 +14,14 @@ with open('README.rst') as f:
 
 # Load requirements
 requirements = [
-    'IPython == 8.12.2',
-    'matplotlib == 3.5.3',
-    'numpy == 1.18.5',
-    'opencv-python == 4.5.1.48',
-    'Pillow == 9.5.0',
-    'plotly == 5.11.0',
-    'requests == 2.31.0',
-    'six == 1.16.0',
-    'tabulate == 0.9.0'
+    'IPython >= 8.12.3',
+    'matplotlib >= 3.5.3',
+    'numpy >= 1.18.5',
+    'opencv-python >= 4.5.3.56',
+    'Pillow >= 10.2.0',
+    'plotly >= 5.18.0',
+    'requests >= 2.31.0',
+    'tabulate >= 0.9.0'
 ]
 
 # Setup library
