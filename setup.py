@@ -43,7 +43,7 @@ setup(
     include_package_data=True,
     install_requires=requirements,
     extras_require={
-        'test': ['nose2[coverage_plugin]']
+        'test': ['nose2[coverage_plugin]', 'pytest']
     },
     keywords=MLStructFP.__keywords__,
     name='MLStructFP',
