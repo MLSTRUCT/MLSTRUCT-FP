@@ -320,7 +320,7 @@ class RectFloorPhoto(BaseImage):
         pixels: 'np.ndarray'
         if self._empty_color >= 0:
             image: 'np.ndarray' = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
-            if image.shape[2] == 4:
+            if len(image.shape) == 3 and image.shape[2] == 4:
                 # Make mask of where the transparent bits are
                 trans_mask = image[:, :, 3] == 0
 
@@ -333,13 +333,17 @@ class RectFloorPhoto(BaseImage):
             pixels = cv2.imread(ip)
 
             # Turn all black lines to white
-            if np.max(pixels) == 0:
+            if len(image.shape) == 3 and np.max(pixels) == 0:
                 image = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
                 trans_mask = image[:, :, 3] == 0
                 image[trans_mask] = [255, 255, 255, 255]  # Turn all black to white to invert
                 pixels = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
         if self._invert:
             pixels = 255 - pixels
+
+        # If image has only 1 channel, convert back to 3
+        if len(pixels.shape) == 2:
+            pixels = np.stack([pixels, pixels, pixels], axis=-1)
 
         # Flip image
         if floor.mutator_scale_x < 0:
