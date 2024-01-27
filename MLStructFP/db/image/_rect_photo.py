@@ -404,7 +404,8 @@ class RectFloorPhoto(BaseImage):
         dy = (ymax - ymin) / 2
         return self._make(floor, GeomPoint2D(xmin + dx, ymin + dy), dx, dy, rect)
 
-    def _make(self, floor: 'Floor', cr: 'GeomPoint2D', dx: float, dy: float, rect: Optional['Rect']) -> Tuple[int, 'np.ndarray']:
+    def _make(self, floor: 'Floor', cr: 'GeomPoint2D', dx: float, dy: float, rect: Optional['Rect']
+              ) -> Tuple[int, 'np.ndarray']:
         """
         Generate image for a given coordinate (x, y).
 
