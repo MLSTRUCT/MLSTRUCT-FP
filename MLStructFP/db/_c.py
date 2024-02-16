@@ -4,10 +4,13 @@ MLSTRUCTFP - DB - C
 Base FP component.
 """
 
-__all__ = ['BaseComponent']
+__all__ = ['BaseComponent', 'BasePolyComponent']
+
+import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 from MLStructFP.utils import GeomPoint2D
-from MLStructFP._types import List, TYPE_CHECKING, VectorInstance
+from MLStructFP._types import List, TYPE_CHECKING, VectorInstance, NumberType
 
 if TYPE_CHECKING:
     from MLStructFP.db._floor import Floor
@@ -56,3 +59,84 @@ class BaseComponent(object):
         Plot simple using matplotlib.
         """
         raise NotImplementedError
+
+
+class BasePolyComponent(BaseComponent):
+    """
+    Polygonal-type base component.
+    """
+
+    def __svg_path(self, dx: NumberType = 0, dy: NumberType = 0) -> str:
+        """
+        Get svg path for plotting the object.
+
+        :return: SVG path string
+        :param dx: X displacement
+        :param dy: Y displacement
+        """
+        px, py = [p.x for p in self.points], [p.y for p in self.points]
+        for i in range(len(px)):  # Adds displacement (dx, dy)
+            px[i] += dx
+            py[i] += dy
+        svg = f'M {px[0]},{py[0]}'
+        for i in range(1, len(px)):
+            svg += f' L{px[i]},{py[i]}'
+        svg += ' Z'
+        return svg
+
+    # noinspection PyUnusedLocal
+    def plot_plotly(
+            self,
+            fig: 'go.Figure',
+            dx: NumberType,
+            dy: NumberType,
+            opacity: NumberType,
+            color: str,
+            name: str,
+            **kwargs
+    ) -> None:
+        """
+        Plot polygon object.
+
+        :param fig: Figure object
+        :param dx: X displacement
+        :param dy: Y displacement
+        :param opacity: Object opacity
+        :param color: Color
+        :param name: Object name
+        :param kwargs: Optional keyword arguments
+        """
+        _path = self.__svg_path(dx=dx, dy=dy)
+        fig.add_shape(
+            fillcolor=color,
+            line_color=color,
+            name=name,
+            opacity=opacity,
+            path=_path,
+            type='path'
+        )
+
+    def plot_matplotlib(
+            self,
+            ax: 'plt.Axes',
+            linewidth: NumberType,
+            alpha: NumberType,
+            color: str,
+            fill: bool
+    ) -> None:
+        """
+        Plot simple using matplotlib.
+
+        :param ax: Matplotlib axes reference
+        :param linewidth: Plot linewidth
+        :param alpha: Alpha transparency value (0-1)
+        :param color: Plot color
+        :param fill: Fill object
+        """
+        px, py = [p.x for p in self.points], [p.y for p in self.points]
+        px.append(px[0])
+        py.append(py[0])
+        if fill:
+            ax.fill(px, py, color=color, lw=None, alpha=alpha)
+        else:
+            ax.plot(px, py, '-', color=color, linewidth=linewidth, alpha=alpha)

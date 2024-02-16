@@ -86,52 +86,6 @@ def _sgn(x) -> float:
         return 1
 
 
-def _swap_colors(image: 'np.ndarray', cfrom: int, cto: int, tol: float = 1e-3):
-    """
-    Swap colors from image.
-
-    :param image: Target image
-    :param cfrom: Color from
-    :param cto: Color to
-    :param tol: Tolerance
-    """
-    assert 0 <= cfrom <= 255
-    assert 0 <= cto <= 255
-    if cfrom == cto:
-        return
-
-    ccof = (cfrom, cfrom, cfrom)
-    ccol = (cto, cto, cto)
-
-    def _make_range(color) -> tuple:
-        """
-        Create color range from to.
-
-        :param color: Target color
-        :return: Range color
-        """
-        e = tol
-        if color == 0:
-            return (0, 0, 0), (color + e, color + e, color + e)
-        elif abs(color - e) <= 255:
-            return (color - e, color - e, color - e), (color, color, color)
-        else:
-            return (color, color, color), (color + e, color + e, color + e)
-
-    # Create mask to change black to export color
-    bc = _make_range(cfrom)
-    mask_b_c = cv2.inRange(cv2.cvtColor(image, cv2.COLOR_BGR2HSV), bc[0], bc[1])
-
-    # Color to black
-    cb = _make_range(cto)
-    mask_c_b = cv2.inRange(cv2.cvtColor(image, cv2.COLOR_BGR2HSV), cb[0], cb[1])
-    # _show_img([mask_b_c, mask_c_b])
-
-    # Replace color from mask
-    image[mask_b_c == 255] = ccol
-    image[mask_c_b == 255] = ccof
-
-
 def _rotate_image(image: 'np.ndarray', angle: float, bound: bool = True) -> 'np.ndarray':
     """
     Rotate image around center.
@@ -143,7 +97,7 @@ def _rotate_image(image: 'np.ndarray', angle: float, bound: bool = True) -> 'np.
     """
     if angle == 0:
         return image
-    if bound:
+    elif bound:
         return _rotate_image_bound(image, angle)
     (h, w) = image.shape[:2]
     image_center = (w // 2, h // 2)
@@ -160,7 +114,6 @@ def _rotate_image_bound(mat: 'np.ndarray', angle: float) -> 'np.ndarray':
     :param angle: Rotation angle
     :return: Rotated image
     """
-
     height, width = mat.shape[:2]  # image shape has 3 dimensions
     image_center = (
         width / 2,
@@ -216,7 +169,6 @@ def _show_dot_image(
     :param image: Image
     :param points: List of points
     """
-
     image = image.copy()
 
     def _dot(_x: Union[int, float], _y: Union[int, float], color: List[int]) -> None:
@@ -333,7 +285,7 @@ class RectFloorPhoto(BaseImage):
             pixels = cv2.imread(ip)
 
             # Turn all black lines to white
-            if len(image.shape) == 3 and np.max(pixels) == 0:
+            if len(pixels.shape) == 3 and np.max(pixels) == 0:
                 image = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
                 trans_mask = image[:, :, 3] == 0
                 image[trans_mask] = [255, 255, 255, 255]  # Turn all black to white to invert

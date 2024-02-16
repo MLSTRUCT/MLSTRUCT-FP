@@ -8,6 +8,7 @@ __all__ = ['DbLoader']
 
 from MLStructFP.db._floor import Floor
 from MLStructFP.db._c_rect import Rect
+from MLStructFP.db._c_point import Point
 from MLStructFP.db._c_slab import Slab
 from MLStructFP._types import Tuple
 
@@ -54,7 +55,7 @@ class DbLoader(object):
                 rect_a = rect_data['angle']
                 Rect(
                     rect_id=int(rect_id),
-                    wall_id=rect_data['wallID'],
+                    wall_id=int(rect_data['wallID']),
                     floor=self.floor[rect_data['floorID']],
                     angle=rect_a if not isinstance(rect_a, list) else rect_a[0],
                     length=rect_data['length'],
@@ -64,6 +65,16 @@ class DbLoader(object):
                     line_m=rect_data['line'][0],  # Slope
                     line_n=rect_data['line'][1],  # Intercept
                     line_theta=rect_data['line'][2]  # Theta
+                )
+            for point_id in data['point']:
+                point_data: dict = data['point'][point_id]
+                Point(
+                    point_id=int(point_id),
+                    wall_id=int(point_data['wallID']),
+                    floor=self.floor[point_data['floorID']],
+                    x=point_data['x'],
+                    y=point_data['y'],
+                    topo=int(point_data['topo'])
                 )
             for slab_id in data['slab']:
                 slab_data: dict = data['slab'][slab_id]
@@ -90,7 +101,7 @@ class DbLoader(object):
         theads = ['#']
         if show_project_id:
             theads.append('Project ID')
-        for t in ('Floor ID', 'No. rects', 'No. slabs', 'Floor image path'):
+        for t in ('Floor ID', 'No. rects', 'No. points', 'No. slabs', 'Floor image path'):
             theads.append(t)
         table = [theads]
         for j in range(len(self.floors)):
@@ -98,7 +109,7 @@ class DbLoader(object):
             table_data = [j]
             if show_project_id:
                 table_data.append(f.project_id)
-            for i in (f.id, len(f.rect), len(f.slab), f.image_path):
+            for i in (f.id, len(f.rect), len(f.point), len(f.slab), f.image_path):
                 table_data.append(i)
             table.append(table_data)
             if 0 < limit - 1 <= j:

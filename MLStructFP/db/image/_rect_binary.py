@@ -18,9 +18,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-# import matplotlib as mpl
-# mpl.rcParams['savefig.pad_inches'] = 0
-
 if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
     from MLStructFP.db._floor import Floor
@@ -191,9 +188,7 @@ class RectBinaryImage(BaseImage):
 
         # Save to array
         if self.save:
-            # array = np.where(array > 0, 0, 1)
             self._images.append(array)
-            # self._images.append(array)
             self._names.append(figname)
 
         # Close data
