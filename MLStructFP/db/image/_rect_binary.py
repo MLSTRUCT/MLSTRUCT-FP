@@ -140,6 +140,16 @@ class RectBinaryImage(BaseImage):
         """
         return im.convert('P', palette=Image.ADAPTIVE)
 
+    # noinspection PyMethodMayBeStatic
+    def _post_process(self, im: 'Image.Image') -> 'Image.Image':
+        """
+        Post process image.
+
+        :param im: Image
+        :return: Post-processed image
+        """
+        return im
+
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
                     floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
         """
@@ -183,7 +193,7 @@ class RectBinaryImage(BaseImage):
 
         # Crop
         s_crop = self._image_size + self._crop_px
-        im4: 'Image.Image' = im3.crop((self._crop_px, self._crop_px, s_crop, s_crop))
+        im4: 'Image.Image' = self._post_process(im3.crop((self._crop_px, self._crop_px, s_crop, s_crop)))
 
         # Save to file
         if self._save_images:

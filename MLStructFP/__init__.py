@@ -9,7 +9,7 @@ __author__ = 'Pablo Pizarro R.'
 __description__ = 'Machine learning structural floor plan dataset'
 __keywords__ = ['ml', 'ai', 'dataset', 'calc', 'matrix analysis', 'cnn', 'structural analysis', 'structural design']
 __email__ = 'pablo@ppizarror.com'
-__version__ = '0.4.9'
+__version__ = '0.5.0'
 
 # URL
 __url__ = 'https://github.com/MLSTRUCT/MLSTRUCT-FP'
