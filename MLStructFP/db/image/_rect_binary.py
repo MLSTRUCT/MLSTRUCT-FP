@@ -130,6 +130,16 @@ class RectBinaryImage(BaseImage):
             floor=rect.floor, rect=rect
         )
 
+    # noinspection PyMethodMayBeStatic
+    def _convert_image_color(self, im: 'Image.Image') -> 'Image.Image':
+        """
+        Convert image.
+
+        :param im: Image
+        :return: Converted image
+        """
+        return im.convert('P', palette=Image.ADAPTIVE)
+
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
                     floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
         """
@@ -158,15 +168,14 @@ class RectBinaryImage(BaseImage):
         ax.set_xlim(min(xmin, xmax), max(xmin, xmax))
         ax.set_ylim(min(ymin, ymax), max(ymin, ymax))
 
-        # Convert
+        # Convert from matplotlib
         ram = io.BytesIO()
         plt.savefig(ram, format='png', dpi=100, bbox_inches='tight', transparent=False)
         ram.seek(0)
         im: 'Image.Image' = Image.open(ram)
 
-        im2: 'Image.Image' = im.convert('RGB').convert('P', palette=Image.ADAPTIVE)
-        # im2 = im.convert('RGB')  # Produces larger files
-        # im2 = im.convert('1')
+        # Convert color
+        im2: 'Image.Image' = self._convert_image_color(im.convert('RGB'))
 
         # Resize
         s_resize = self._image_size + 2 * self._crop_px
