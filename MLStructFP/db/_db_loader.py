@@ -66,16 +66,17 @@ class DbLoader(object):
                     line_n=rect_data['line'][1],  # Intercept
                     line_theta=rect_data['line'][2]  # Theta
                 )
-            for point_id in data['point']:
-                point_data: dict = data['point'][point_id]
-                Point(
-                    point_id=int(point_id),
-                    wall_id=int(point_data['wallID']),
-                    floor=self.floor[point_data['floorID']],
-                    x=point_data['x'],
-                    y=point_data['y'],
-                    topo=int(point_data['topo'])
-                )
+            if 'point' in data:
+                for point_id in data['point']:
+                    point_data: dict = data['point'][point_id]
+                    Point(
+                        point_id=int(point_id),
+                        wall_id=int(point_data['wallID']),
+                        floor=self.floor[point_data['floorID']],
+                        x=point_data['x'],
+                        y=point_data['y'],
+                        topo=int(point_data['topo'])
+                    )
             for slab_id in data['slab']:
                 slab_data: dict = data['slab'][slab_id]
                 Slab(
