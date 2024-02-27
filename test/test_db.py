@@ -8,7 +8,7 @@ import numpy as np
 import os
 import unittest
 
-from MLStructFP.db import DbLoader
+from MLStructFP.db import DbLoader, Floor
 from MLStructFP.db.image import *
 
 DB_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data', 'fp.json')
@@ -21,14 +21,14 @@ class DbLoaderTest(unittest.TestCase):
         Test db loader path and number of dataset items.
         """
         db = DbLoader(DB_PATH)
-        self.assertEqual(os.path.dirname(DB_PATH), db._path)
+        self.assertEqual(os.path.dirname(DB_PATH), db.path)
         db.tabulate()
 
         # Test floors
-        self.assertEqual(len(db.floor), 7)
+        self.assertEqual(len(db.floors), 7)
 
         # Test geometry of a given object
-        f = db.floor[302]
+        f = db[302]
         self.assertEqual(len(f.rect), 80)
         self.assertEqual(len(f.slab), 1)
         self.assertAlmostEqual(f.bounding_box.xmin, 1.08599, places=3)
@@ -48,6 +48,13 @@ class DbLoaderTest(unittest.TestCase):
         # Check image
         self.assertEqual(f.image_scale, 188.445)
         self.assertEqual(os.path.basename(f.image_path), 'f23ccf42b9c42bfe7c37a1fb7a1ea100e3d34596.png')
+
+        # Test filter
+        def my_filter(db_f: 'Floor') -> bool:
+            return db_f.id >= 1000
+
+        db.set_filter(my_filter)
+        self.assertEqual(len(db.floors), 3)
 
     def test_mutator(self) -> None:
         """

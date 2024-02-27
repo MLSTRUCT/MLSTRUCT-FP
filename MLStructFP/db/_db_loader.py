@@ -18,15 +18,16 @@ import tabulate
 
 from IPython.display import HTML, display
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Callable, Optional, List
 
 
 class DbLoader(object):
     """
     Dataset loader.
     """
-    _path: str
-    floor: Dict[int, 'Floor']
+    __filter: Optional[Callable[['Floor'], bool]]
+    __floor: Dict[int, 'Floor']
+    __path: str
 
     def __init__(self, db: str) -> None:
         """
@@ -35,8 +36,9 @@ class DbLoader(object):
         :param db: Dataset path
         """
         assert os.path.isfile(db), f'Dataset file {db} not found'
-        self._path = str(Path(os.path.realpath(db)).parent)
-        self.floor = {}
+        self.__filter = None
+        self.__path = str(Path(os.path.realpath(db)).parent)
+        self.__floor = {}
 
         with open(db, 'r', encoding='utf8') as dbfile:
             data = json.load(dbfile)
@@ -44,9 +46,9 @@ class DbLoader(object):
             # Assemble objects
             for f_id in data['floor']:
                 f_data: dict = data['floor'][f_id]
-                self.floor[int(f_id)] = Floor(
+                self.__floor[int(f_id)] = Floor(
                     floor_id=int(f_id),
-                    image_path=os.path.join(self._path, f_data['image']),
+                    image_path=os.path.join(self.__path, f_data['image']),
                     image_scale=f_data['scale'],
                     project_id=f_data['project'] if 'project' in f_data else -1
                 )
@@ -56,7 +58,7 @@ class DbLoader(object):
                 Rect(
                     rect_id=int(rect_id),
                     wall_id=int(rect_data['wallID']),
-                    floor=self.floor[rect_data['floorID']],
+                    floor=self.__floor[rect_data['floorID']],
                     angle=rect_a if not isinstance(rect_a, list) else rect_a[0],
                     length=rect_data['length'],
                     thickness=rect_data['thickness'],
@@ -72,7 +74,7 @@ class DbLoader(object):
                     Point(
                         point_id=int(point_id),
                         wall_id=int(point_data['wallID']),
-                        floor=self.floor[point_data['floorID']],
+                        floor=self.__floor[point_data['floorID']],
                         x=point_data['x'],
                         y=point_data['y'],
                         topo=int(point_data['topo'])
@@ -81,15 +83,33 @@ class DbLoader(object):
                 slab_data: dict = data['slab'][slab_id]
                 Slab(
                     slab_id=int(slab_id),
-                    floor=self.floor[slab_data['floorID']],
+                    floor=self.__floor[slab_data['floorID']],
                     x=slab_data['x'],
                     y=slab_data['y']
                 )
 
+    def __getitem__(self, item: int) -> 'Floor':
+        return self.__floor[item]
+
     @property
     def floors(self) -> Tuple['Floor', ...]:
-        # noinspection PyTypeChecker
-        return tuple(self.floor.values())
+        floors: List['Floor'] = []
+        for f in self.__floor.values():
+            if self.__filter is None or self.__filter(f):
+                floors.append(f)
+        return tuple(floors)
+
+    @property
+    def path(self) -> str:
+        return self.__path
+
+    def set_filter(self, f_filter: Callable[['Floor'], bool]) -> None:
+        """
+        Set floor filter.
+
+        :param f_filter: Floor filter
+        """
+        self.__filter = f_filter
 
     def tabulate(self, limit: int = 0, show_project_id: bool = False) -> None:
         """
@@ -105,8 +125,9 @@ class DbLoader(object):
         for t in ('Floor ID', 'No. rects', 'No. points', 'No. slabs', 'Floor image path'):
             theads.append(t)
         table = [theads]
-        for j in range(len(self.floors)):
-            f: 'Floor' = self.floors[j]
+        floors = self.floors
+        for j in range(len(floors)):
+            f: 'Floor' = floors[j]
             table_data = [j]
             if show_project_id:
                 table_data.append(f.project_id)
