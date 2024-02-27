@@ -26,6 +26,7 @@ class DbLoader(object):
     Dataset loader.
     """
     __filter: Optional[Callable[['Floor'], bool]]
+    __filtered_floors: List['Floor']
     __floor: Dict[int, 'Floor']
     __path: str
 
@@ -37,6 +38,7 @@ class DbLoader(object):
         """
         assert os.path.isfile(db), f'Dataset file {db} not found'
         self.__filter = None
+        self.__filtered_floors = []
         self.__path = str(Path(os.path.realpath(db)).parent)
         self.__floor = {}
 
@@ -93,11 +95,11 @@ class DbLoader(object):
 
     @property
     def floors(self) -> Tuple['Floor', ...]:
-        floors: List['Floor'] = []
-        for f in self.__floor.values():
-            if self.__filter is None or self.__filter(f):
-                floors.append(f)
-        return tuple(floors)
+        if len(self.__filtered_floors) == 0:
+            for f in self.__floor.values():
+                if self.__filter is None or self.__filter(f):
+                    self.__filtered_floors.append(f)
+        return tuple(self.__filtered_floors)
 
     @property
     def path(self) -> str:
@@ -110,6 +112,7 @@ class DbLoader(object):
         :param f_filter: Floor filter
         """
         self.__filter = f_filter
+        self.__filtered_floors.clear()
 
     def tabulate(self, limit: int = 0, show_project_id: bool = False) -> None:
         """
