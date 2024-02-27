@@ -271,6 +271,8 @@ class RectFloorPhoto(BaseImage):
         pixels: 'np.ndarray'
         if self._empty_color >= 0:
             image: 'np.ndarray' = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
+            if image is None:
+                raise RectFloorPhotoFileLoadException(ip)
             if len(image.shape) == 3 and image.shape[2] == 4:
                 # Make mask of where the transparent bits are
                 trans_mask = image[:, :, 3] == 0
@@ -281,6 +283,8 @@ class RectFloorPhoto(BaseImage):
                 pixels = image
         else:
             pixels = cv2.imread(ip)
+            if pixels is None:
+                raise RectFloorPhotoFileLoadException(ip)
             # Turn all black lines to white
             if len(pixels.shape) == 3 and np.max(pixels) == 0:
                 image = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
@@ -538,7 +542,7 @@ class RectFloorPhoto(BaseImage):
             except ValueError as e:
                 if rect is not None:
                     print(f'Shape inconsistency at rect ID <{rect.id}>, Floor ID {rect.floor.id}')
-                raise RectFloorShapeException(str(e))
+                raise RectFloorPhotoShapeException(str(e))
 
         """
         Good:       INTER_AREA
@@ -579,7 +583,13 @@ class RectFloorPhoto(BaseImage):
         gc.collect()
 
 
-class RectFloorShapeException(Exception):
+class RectFloorPhotoShapeException(Exception):
     """
     Custom exception from rect floor generation image.
+    """
+
+
+class RectFloorPhotoFileLoadException(Exception):
+    """
+    Exception thrown if the image could not be loaded.
     """
