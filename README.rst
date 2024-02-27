@@ -217,7 +217,8 @@ Citing
 .. code-block:: tex
     
     @article{Pizarro2023,
-      title = {Large-scale multi-unit floor plan dataset for architectural plan analysis and recognition},
+      title = {Large-scale multi-unit floor plan datasetfor architectural plan analysis and
+               recognition},
       journal = {Automation in Construction},
       volume = {156},
       pages = {105132},
