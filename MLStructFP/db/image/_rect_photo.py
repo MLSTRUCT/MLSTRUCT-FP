@@ -255,8 +255,8 @@ class RectFloorPhoto(BaseImage):
         self._floor_images = {}
         self._floor_center_d = {}
 
-    def parse_image(self, ip: str, mutator_scale_x: float = 1, mutator_scale_y: float = 1,
-                    mutator_angle: float = 0, verbose: bool = False) -> Tuple['np.ndarray', 'GeomPoint2D']:
+    def _parse_image(self, ip: str, mutator_scale_x: float = 1, mutator_scale_y: float = 1,
+                     mutator_angle: float = 0, verbose: bool = False) -> Tuple['np.ndarray', 'GeomPoint2D']:
         """
         Process image.
 
@@ -331,8 +331,8 @@ class RectFloorPhoto(BaseImage):
 
         if self._verbose:
             print(f'Loading image: {ip}')
-        pixels, pc = self.parse_image(ip, floor.mutator_scale_x, floor.mutator_scale_y,
-                                      floor.mutator_angle, self._verbose)
+        pixels, pc = self._parse_image(ip, floor.mutator_scale_x, floor.mutator_scale_y,
+                                       floor.mutator_angle, self._verbose)
 
         # Store
         self._floor_images[floor_hash] = pixels
