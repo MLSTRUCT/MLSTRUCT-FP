@@ -15,13 +15,14 @@ import gc
 import math
 import numpy as np
 import os
+import time
 
 if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
     from MLStructFP.db._floor import Floor
 
-IMAGES_TO_CLEAR_MEMORY = 10000
-MAX_STORED_FLOORS = 2
+IMAGES_TO_CLEAR_MEMORY: int = 10000
+MAX_STORED_FLOORS: int = 2
 
 
 def _im_show(title: str, img: 'np.ndarray') -> None:
@@ -254,20 +255,18 @@ class RectFloorPhoto(BaseImage):
         self._floor_images = {}
         self._floor_center_d = {}
 
-    def _get_floor_image(self, floor: 'Floor') -> Tuple['np.ndarray', 'GeomPoint2D']:
+    def parse_image(self, ip: str, mutator_scale_x: float = 1, mutator_scale_y: float = 1,
+                    mutator_angle: float = 0, verbose: bool = False) -> Tuple['np.ndarray', 'GeomPoint2D']:
         """
-        Get floor image numpy class.
+        Process image.
 
-        :param floor: Floor object
-        :return: Image array
+        :param ip: Image path
+        :param mutator_scale_x: Mutator scale on x-axis
+        :param mutator_scale_y: Mutator scale on y-axis
+        :param mutator_angle: Mutator angle
+        :param verbose: Verbose mode
+        :return: Parsed image, center
         """
-        floor_hash = f'{floor.id}{floor.mutator_angle}{floor.mutator_scale_x}{floor.mutator_scale_y}'
-        if floor_hash in self._floor_images.keys():
-            return self._floor_images[floor_hash], self._floor_center_d[floor_hash]
-        ip = floor.image_path
-        if self._verbose:
-            print(f'Loading image: {ip}')
-
         # Make default empty color
         pixels: 'np.ndarray'
         if self._empty_color >= 0:
@@ -275,7 +274,6 @@ class RectFloorPhoto(BaseImage):
             if len(image.shape) == 3 and image.shape[2] == 4:
                 # Make mask of where the transparent bits are
                 trans_mask = image[:, :, 3] == 0
-
                 # Replace areas of transparency with white and not transparent
                 image[trans_mask] = [self._empty_color, self._empty_color, self._empty_color, 255]
                 pixels = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
@@ -283,7 +281,6 @@ class RectFloorPhoto(BaseImage):
                 pixels = image
         else:
             pixels = cv2.imread(ip)
-
             # Turn all black lines to white
             if len(pixels.shape) == 3 and np.max(pixels) == 0:
                 image = cv2.imread(ip, cv2.IMREAD_UNCHANGED)
@@ -298,37 +295,58 @@ class RectFloorPhoto(BaseImage):
             pixels = np.stack([pixels, pixels, pixels], axis=-1)
 
         # Flip image
-        if floor.mutator_scale_x < 0:
-            pixels = cv2.flip(pixels, 1)
-        if floor.mutator_scale_y < 0:
-            pixels = cv2.flip(pixels, 0)
+        if mutator_scale_x != 1 or mutator_scale_y != 1:
+            if mutator_scale_x < 0:
+                pixels = cv2.flip(pixels, 1)
+            if mutator_scale_y < 0:
+                pixels = cv2.flip(pixels, 0)
 
-        # Transform image due to mutators
-        sy, sx, _ = pixels.shape
-        sx = int(math.ceil(abs(sx * floor.mutator_scale_x)))
-        sy = int(math.ceil(abs(sy * floor.mutator_scale_y)))
-        pixels = cv2.resize(pixels, (sx, sy))
+            # Transform image due to mutators
+            sy, sx, _ = pixels.shape
+            sx = int(math.ceil(abs(sx * mutator_scale_x)))
+            sy = int(math.ceil(abs(sy * mutator_scale_y)))
+            pixels = cv2.resize(pixels, (sx, sy))
 
         source_pixels: 'np.ndarray' = pixels
-        if self._verbose:
+        if verbose:
             source_pixels = pixels.copy()
         cy, cx = pixels.shape[:2]  # Source center pixel
-        pc = GeomPoint2D(cx, cy)
-        pixels = _rotate_image(pixels, floor.mutator_angle)
-        if self._verbose:
+        pixels = _rotate_image(pixels, mutator_angle)
+        if verbose:
             _show_img([source_pixels, pixels])
+
+        return pixels, GeomPoint2D(cx, cy)
+
+    def _get_floor_image(self, floor: 'Floor') -> Tuple['np.ndarray', 'GeomPoint2D']:
+        """
+        Get floor image numpy class.
+
+        :param floor: Floor object
+        :return: Image array
+        """
+        floor_hash = f'{floor.id}{floor.mutator_angle}{floor.mutator_scale_x}{floor.mutator_scale_y}'
+        if floor_hash in self._floor_images.keys():
+            return self._floor_images[floor_hash], self._floor_center_d[floor_hash]
+        ip = floor.image_path
+
+        if self._verbose:
+            print(f'Loading image: {ip}')
+        pixels, pc = self.parse_image(ip, floor.mutator_scale_x, floor.mutator_scale_y,
+                                      floor.mutator_angle, self._verbose)
 
         # Store
         self._floor_images[floor_hash] = pixels
         self._floor_center_d[floor_hash] = pc
-        # print('Storing', self.name, floor_hash)
+        if self._verbose:
+            print('Storing', ip, floor_hash)
 
         if len(self._floor_images) >= MAX_STORED_FLOORS:
             key_iter = iter(self._floor_images.keys())
             k1: str = next(key_iter)
             del self._floor_images[k1]  # Remove
             del self._floor_center_d[k1]
-            # print('Removing', self.name, k1)
+            if self._verbose:
+                print('Removing', ip, k1)
 
         return pixels, pc
 
@@ -487,6 +505,7 @@ class RectFloorPhoto(BaseImage):
         :param rect: Rect object from the image
         :return: Cropped image
         """
+        t = time.time()
         x = [x1, x2]
         y = [y1, y2]
         x1, x2 = min(x), max(x)
@@ -529,8 +548,8 @@ class RectFloorPhoto(BaseImage):
         """
         out_rz: 'np.ndarray' = cv2.resize(out_img, (self._image_size, self._image_size),
                                           interpolation=cv2.INTER_AREA)
-        # if self._verbose:
-        #     print('Process finished in {0} seconds'.format(int(time.time() - t)))
+        if self._verbose:
+            print('Process finished in {0} seconds'.format(int(time.time() - t)))
         im = out_rz.astype(TYPE_IMAGE)
         _alpha = -5
         if self._empty_color == 0:
@@ -542,8 +561,9 @@ class RectFloorPhoto(BaseImage):
         # Apply kernel
         image_kernel = cv2.filter2D(adjusted, -1, self._kernel)
 
-        # _show_img([im, adjusted, cv2.convertScaleAbs(im, alpha=2 * _alpha, beta=0), 255 - adjusted, image_kernel],
-        #           ['Base', 'Adjusted', 'Adjusted2', 'Negative adjusted', 'By kernel'])
+        if self._verbose:
+            _show_img([im, adjusted, cv2.convertScaleAbs(im, alpha=2 * _alpha, beta=0), 255 - adjusted, image_kernel],
+                      ['Base', 'Adjusted', 'Adjusted2', 'Negative adjusted', 'By kernel'])
 
         return image_kernel
 
