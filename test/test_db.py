@@ -108,6 +108,7 @@ class DbLoaderTest(unittest.TestCase):
 
         image_binary = RectBinaryImage(image_size_px=256).init()
         image_photo = RectFloorPhoto(image_size_px=256)
+        self.assertEqual(image_binary.image_shape, (256, 256))
 
         r = f[0].rect[3]  # Selected rectangle
         image_binary.make_rect(r)

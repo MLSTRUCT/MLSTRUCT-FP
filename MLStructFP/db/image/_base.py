@@ -57,6 +57,10 @@ class BaseImage(object):
 
         self.save = True
 
+    @property
+    def image_shape(self) -> Tuple[int, int]:
+        return self._image_size, self._image_size
+
     def make_rect(self, rect: 'Rect', crop_length: NumberType) -> Tuple[int, 'np.ndarray']:
         """
         Generate image for the perimeter of a given rectangle.

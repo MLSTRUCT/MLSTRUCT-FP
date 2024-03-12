@@ -516,8 +516,12 @@ class RectFloorPhoto(BaseImage):
         y1, y2 = min(y), max(y)
         ww = int(x2 - x1)
         hh = int(y2 - y1)
-        out_img = np.zeros((ww, hh, 3))
-        w, h, _ = image.shape  # Real image size
+        if len(image.shape) == 2:
+            w, h = image.shape
+            out_img = np.zeros((ww, hh))
+        else:
+            w, h, c = image.shape
+            out_img = np.zeros((ww, hh, c))
         dx = 0
         if x1 < 0:
             dx = - x1
@@ -560,7 +564,6 @@ class RectFloorPhoto(BaseImage):
             adjusted: 'np.ndarray' = cv2.convertScaleAbs(im, alpha=_alpha, beta=0)
         else:
             adjusted = im
-        # _swap_colors(adjusted, 0, self._empty_color)
 
         # Apply kernel
         image_kernel = cv2.filter2D(adjusted, -1, self._kernel)
