@@ -30,11 +30,12 @@ class DbLoader(object):
     __floor: Dict[int, 'Floor']
     __path: str
 
-    def __init__(self, db: str) -> None:
+    def __init__(self, db: str, floor_only: bool = False) -> None:
         """
         Loads a dataset file.
 
         :param db: Dataset path
+        :param floor_only: If true, load only floors
         """
         assert os.path.isfile(db), f'Dataset file {db} not found'
         self.__filter = None
@@ -45,7 +46,7 @@ class DbLoader(object):
         with open(db, 'r', encoding='utf8') as dbfile:
             data = json.load(dbfile)
 
-            # Assemble objects
+            # Load floors
             for f_id in data['floor']:
                 f_data: dict = data['floor'][f_id]
                 self.__floor[int(f_id)] = Floor(
@@ -54,6 +55,10 @@ class DbLoader(object):
                     image_scale=f_data['scale'],
                     project_id=f_data['project'] if 'project' in f_data else -1
                 )
+            if floor_only:
+                return
+
+            # Load objects
             for rect_id in data['rect']:
                 rect_data: dict = data['rect'][rect_id]
                 rect_a = rect_data['angle']
