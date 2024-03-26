@@ -47,7 +47,7 @@ class Floor(object):
         assert os.path.isfile(image_path), f'Image file {image_path} does not exist'
         assert isinstance(image_scale, NumberInstance) and image_scale > 0
         self.id = floor_id
-        self.image_path = image_path
+        self.image_path = image_path.replace('\\', '/')
         self.image_scale = float(image_scale)
         self.project_id = project_id
         self._bb = None
