@@ -311,7 +311,7 @@ class RectFloorPhoto(BaseImage):
             sy = int(math.ceil(abs(sy * mutator_scale_y)))
             pixels = cv2.resize(pixels, (sx, sy))
 
-        source_pixels: 'np.ndarray' = pixels
+        source_pixels: Optional['np.ndarray'] = None
         if verbose:
             source_pixels = pixels.copy()
         cy, cx = pixels.shape[:2]  # Source center pixel
