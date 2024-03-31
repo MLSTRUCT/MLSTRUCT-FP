@@ -321,11 +321,12 @@ class RectFloorPhoto(BaseImage):
 
         return pixels, GeomPoint2D(cx, cy)
 
-    def _get_floor_image(self, floor: 'Floor') -> Tuple['np.ndarray', 'GeomPoint2D']:
+    def _get_floor_image(self, floor: 'Floor', store: bool = True) -> Tuple['np.ndarray', 'GeomPoint2D']:
         """
         Get floor image numpy class.
 
         :param floor: Floor object
+        :param store: Store results for faster future queries
         :return: Image array
         """
         floor_hash = f'{floor.id}{floor.mutator_angle}{floor.mutator_scale_x}{floor.mutator_scale_y}'
@@ -339,19 +340,21 @@ class RectFloorPhoto(BaseImage):
                                        floor.mutator_angle, self._verbose)
 
         # Store
-        self._floor_images[floor_hash] = pixels
-        self._floor_center_d[floor_hash] = pc
-        if self._verbose:
-            print('Storing', ip, floor_hash)
-
-        if len(self._floor_images) >= MAX_STORED_FLOORS:
-            key_iter = iter(self._floor_images.keys())
-            k1: str = next(key_iter)
-            del self._floor_images[k1]  # Remove
-            del self._floor_center_d[k1]
+        if store:
+            self._floor_images[floor_hash] = pixels
+            self._floor_center_d[floor_hash] = pc
             if self._verbose:
-                print('Removing', ip, k1)
+                print('Storing', ip, floor_hash)
 
+            if len(self._floor_images) >= MAX_STORED_FLOORS:
+                key_iter = iter(self._floor_images.keys())
+                k1: str = next(key_iter)
+                del self._floor_images[k1]  # Remove
+                del self._floor_center_d[k1]
+                if self._verbose:
+                    print('Removing', ip, k1)
+
+        # Return pixels and center
         return pixels, pc
 
     def make_rect(self, rect: 'Rect', crop_length: NumberType = 5) -> Tuple[int, 'np.ndarray']:
