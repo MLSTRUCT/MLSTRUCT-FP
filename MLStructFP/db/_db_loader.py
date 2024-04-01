@@ -13,6 +13,7 @@ from MLStructFP.db._c_slab import Slab
 from MLStructFP._types import Tuple
 
 import json
+import math
 import os
 import tabulate
 
@@ -109,6 +110,15 @@ class DbLoader(object):
     @property
     def path(self) -> str:
         return self.__path
+
+    @property
+    def scale_limits(self) -> Tuple[float, float]:
+        sc_min = math.inf
+        sc_max = 0
+        for f in self.floors:
+            sc_min = min(sc_min, f.image_scale)
+            sc_max = max(sc_max, f.image_scale)
+        return sc_min, sc_max
 
     def set_filter(self, f_filter: Callable[['Floor'], bool]) -> None:
         """
