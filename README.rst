@@ -29,10 +29,10 @@ Multi-unit floor plan dataset.
 Description
 -----------
 
-This repo contains the base library to load and parse floor plans from MLSTRUCT-FP dataset, which
-contains over 954 large-scale floor plans images, alongside annotations for their walls in JSON
-format. The database loader just loads in memory the Floor, Walls, and Slab' objects, and also
-offers methods to create custom images from floor plans by applying a crop, a rotation, and custom
+This repo contains the base library to load and parse floor plans from the MLSTRUCT-FP dataset, which
+contains over 954 large-scale floor plan images, alongside annotations for their walls in JSON
+format. The database loader just loads in memory the Floor, Walls, and Slab objects, and also
+offers methods to create custom images from floor plans by applying a crop, a rotation, and a custom
 scaling.
 
 The images can be generated from the real rasterized plan, or by using the polygons stored in the
@@ -50,7 +50,7 @@ In order to install the library, use the following python-pip commands:
 
     python -m pip install MLStructFP
 
-To download the dataset (compressed in .zip), request for a public download link by completing a 
+To download the dataset (compressed in .zip), request a public download link by completing a 
 `simple form <https://forms.gle/HigdGxngnTEvnNC37>`_.
 
 
@@ -69,7 +69,7 @@ The dataset (uncompressed) has the following structure:
         ffd...faf.png
         fp.json
 
-Each image is stored in PNG format, with transparent background. Image
+Each image is stored in PNG format with a transparent background. Image
 size ranges between 6500 and 9500 px. Each file represents a distinct floor,
 whose labels (wall polygons, slabs) and metadata are stored within fp.json.
 
@@ -133,7 +133,7 @@ The format of the fp.json file is characterized as follows:
     }
 
 Note the dataset comprises a list of "rect" representing the rectangles (wall segments),
-"slab" and "floor". Each item has a distinct ID for quering and grouping elements. In the example,
+"slab" and "floor". Each item has a distinct ID for querying and grouping elements. In the example,
 the rect ID ``1000393`` is within floor ID ``8970646``, with an angle of ``0`` degrees, a length
 of ``2.6 m``, and within the wall ID ``5969311``. Likewise, the slab ``1002588`` is within floor
 ID ``5980221``, whose its first point (x, y) is ``(-1.153, -22.622) m``. Finally, the floor ID
@@ -164,7 +164,7 @@ which receives the path of the ``fp.json`` file.
 DbLoader creates a dict of `Floor <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/MLStructFP/db/_floor.py>`_ object,
 which each contains a dict of `Rect <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/MLStructFP/db/_c_rect.py>`_ and
 `Slab <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/MLStructFP/db/_c_slab.py>`_ objects. Each item is associated
-using their respective ids. Floor object also have many methods to retrieve their elements, plot, and apply
+using their respective ids. Floor objects also have many methods to retrieve their elements, plot, and apply
 transformations (aka mutations) such as scaling or rotation using ``mutate()`` method:
 
 .. code-block:: python
@@ -178,7 +178,7 @@ transformations (aka mutations) such as scaling or rotation using ``mutate()`` m
     
     # Example
     plot_floor = db.floor[302]
-    plot_floor.mutate(30, 1, 1)  # 30 degrees, scale 1 in x-axis, 1 in y-axis
+    plot_floor.mutate(30, 1, 1)  # 30 degrees, scale 1 on the x-axis, 1 on the y-axis
     plot_floor.plot_complex()
 
 .. image:: docs/example-plot.png
@@ -188,7 +188,7 @@ transformations (aka mutations) such as scaling or rotation using ``mutate()`` m
 Finally, the most important classes are
 `RectBinaryImage <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/MLStructFP/db/image/_rect_binary.py>`_ and
 `RectFloorPhoto <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/MLStructFP/db/image/_rect_photo.py>`_, whose
-main responsabilities are creating plan crops for machine learning model training. These classes perform crops
+main responsibilities are creating plan crops for machine learning model training. These classes perform crops
 and downsampling on any image size and scale factor. For both objects, the main methods are:
 
 .. code-block:: python
@@ -203,7 +203,7 @@ for each axis). The second one creates a region on any arbitrary ``(xmin, ymin, 
 each position in meters.
 
 From the provided notebook example, the following image shows two crops generated using a mutated floor plan
-with 30 degrees angle rotation. Crops are ``256x256 px`` size, and displays a ``10x10 m`` region, for a selected
+with 30 30-degree angle rotation. Crops are ``256x256 px`` size and display a ``10x10 m`` region, for a selected
 rectangle as origin.
 
 .. image:: docs/example-rects.png
@@ -217,7 +217,7 @@ Citing
 .. code-block:: tex
     
     @article{Pizarro2023,
-      title = {Large-scale multi-unit floor plan datasetfor architectural plan analysis and
+      title = {Large-scale multi-unit floor plan dataset for architectural plan analysis and
                recognition},
       journal = {Automation in Construction},
       volume = {156},
