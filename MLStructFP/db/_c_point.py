@@ -74,8 +74,10 @@ class Point(BasePolyComponent):
             name: str = '',
             **kwargs
     ) -> None:
+        if name != '':
+            name = f'{name} '
         super().plot_plotly(fig, dx, dy, opacity, self.__color() if color == '' else color,
-                            f'Point ID{self.id}{postname} Wall {self.wall_id} TOPO-{self.topo}', **kwargs)
+                            f'Point {name}ID{self.id}{postname} Wall {self.wall_id} TOPO-{self.topo}', **kwargs)
 
     def plot_matplotlib(
             self,

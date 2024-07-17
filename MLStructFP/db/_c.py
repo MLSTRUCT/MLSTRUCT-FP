@@ -1,24 +1,25 @@
 """
 MLSTRUCTFP - DB - C
 
-Base FP component.
+Base FP components.
 """
 
-__all__ = ['BaseComponent', 'BasePolyComponent']
+__all__ = ['BaseComponent', 'BasePolyComponent', 'BasePolyObj']
 
+import abc
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
 from MLStructFP.utils import GeomPoint2D
-from MLStructFP._types import List, TYPE_CHECKING, VectorInstance, NumberType
+from MLStructFP._types import List, TYPE_CHECKING, VectorInstance, NumberType, Dict
 
 if TYPE_CHECKING:
     from MLStructFP.db._floor import Floor
 
 
-class BaseComponent(object):
+class BaseComponent(abc.ABC):
     """
-    Flor plan base component.
+    Floor plan base component.
     """
     floor: 'Floor'
     id: int
@@ -61,7 +62,7 @@ class BaseComponent(object):
         raise NotImplementedError
 
 
-class BasePolyComponent(BaseComponent):
+class BasePolyComponent(BaseComponent, abc.ABC):
     """
     Polygonal-type base component.
     """
@@ -140,3 +141,74 @@ class BasePolyComponent(BaseComponent):
             ax.fill(px, py, color=color, lw=None, alpha=alpha)
         else:
             ax.plot(px, py, '-', color=color, linewidth=linewidth, alpha=alpha)
+
+
+class BasePolyObj(BasePolyComponent, abc.ABC):
+    """
+    FP base polygon object.
+    """
+    __basename: str
+    __color: str
+    category: int
+    category_name: str
+
+    def __init__(
+            self,
+            ctx: Dict[int, 'BasePolyObj'],
+            basename: str,
+            obj_id: int,
+            floor: 'Floor',
+            x: List[float],
+            y: List[float],
+            color: str,
+            category: int,
+            category_name: str,
+    ) -> None:
+        """
+        Constructor.
+
+        :param ctx: Polygon object context
+        :param basename: Basename
+        :param obj_id: ID of the object
+        :param floor: Floor object
+        :param x: List of coordinates within x-axis
+        :param y: List of coordinates within y-axis
+        :param color: Object color
+        :param category: Object category
+        :param category_name: Object category name
+        """
+        BasePolyComponent.__init__(self, obj_id, x, y, floor)
+        ctx[obj_id] = self
+        self.__basename = basename
+        self.__color = color
+        self.category = category
+        self.category_name = category_name
+
+    # noinspection PyUnusedLocal
+    def plot_plotly(
+            self,
+            fig: 'go.Figure',
+            dx: NumberType = 0,
+            dy: NumberType = 0,
+            postname: str = '',
+            opacity: NumberType = 0.2,
+            color: str = '',
+            name: str = '',
+            **kwargs
+    ) -> None:
+        if name != '':
+            name = f'{name} '
+        super().plot_plotly(
+            fig, dx, dy, opacity, self.__color if color == '' else color,
+            '' if self.category_name == '' else f'[{self.category}] ' + f'{self.__basename} {name}ID{self.id}{postname}',
+            **kwargs)
+
+    def plot_matplotlib(
+            self,
+            ax: 'plt.Axes',
+            linewidth: NumberType = 2.0,
+            alpha: NumberType = 1.0,
+            color: str = '',
+            fill: bool = False
+    ) -> None:
+        super().plot_matplotlib(ax, linewidth, alpha, self.__color if color == '' else color, fill)
