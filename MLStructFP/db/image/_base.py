@@ -4,10 +4,7 @@ MLSTRUCTFP - DB - IMAGE - BASE
 Image of the surroundings of a rect.
 """
 
-__all__ = [
-    'BaseImage',
-    'TYPE_IMAGE'
-]
+__all__ = ['BaseImage', 'TYPE_IMAGE']
 
 from MLStructFP._types import TYPE_CHECKING, List, NumberType, Optional, Tuple
 from MLStructFP.utils import make_dirs
@@ -20,7 +17,7 @@ if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
     from MLStructFP.db._floor import Floor
 
-TYPE_IMAGE = 'uint8'
+TYPE_IMAGE: str = 'uint8'
 
 
 class BaseImage(object):

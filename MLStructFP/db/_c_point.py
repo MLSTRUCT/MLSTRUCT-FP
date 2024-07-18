@@ -4,6 +4,8 @@ MLSTRUCTFP - DB - CPOINT
 Point component.
 """
 
+__all__ = ['Point']
+
 from MLStructFP.db._c import BasePolyComponent
 from MLStructFP._types import List, TYPE_CHECKING, NumberType
 

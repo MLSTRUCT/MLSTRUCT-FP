@@ -10,6 +10,7 @@ from MLStructFP.db._floor import Floor
 from MLStructFP.db._c_rect import Rect
 from MLStructFP.db._c_point import Point
 from MLStructFP.db._c_slab import Slab
+from MLStructFP.db._c_room import Room
 from MLStructFP._types import Tuple
 
 import json
@@ -45,22 +46,37 @@ class DbLoader(object):
         self.__floor = {}
 
         with open(db, 'r', encoding='utf8') as dbfile:
-            data = json.load(dbfile)
+            data: dict = json.load(dbfile)
+            meta: dict = data['meta'] if 'meta' in data else {}
+
+            # Load metadata
+            floor_categories: Dict[int, str] = {}
+            for cat in (meta['floor_categories'] if 'floor_categories' in meta else {}):
+                floor_categories[meta['floor_categories'][cat]] = cat
+            room_categories: Dict[int, Tuple[str, str]] = {}
+            for cat in (meta['room_categories'] if 'room_categories' in meta else {}):
+                rc = meta['room_categories'][cat]
+                room_categories[rc[0]] = (cat, rc[1])
+            print(room_categories)
 
             # Load floors
-            for f_id in data['floor']:
+            for f_id in data.get('floor', {}):
                 f_data: dict = data['floor'][f_id]
+                f_cat = int(f_data['category'] if 'category' in f_data else 0)
                 self.__floor[int(f_id)] = Floor(
                     floor_id=int(f_id),
                     image_path=os.path.join(self.__path, f_data['image']),
                     image_scale=f_data['scale'],
-                    project_id=f_data['project'] if 'project' in f_data else -1
+                    project_id=f_data['project'] if 'project' in f_data else -1,
+                    category=f_cat,
+                    category_name=floor_categories.get(f_cat, ''),
+                    elevation=f_data['elevation'] if 'elevation' in f_data else False
                 )
             if floor_only:
                 return
 
             # Load objects
-            for rect_id in data['rect']:
+            for rect_id in data.get('rect', {}):
                 rect_data: dict = data['rect'][rect_id]
                 rect_a = rect_data['angle']
                 Rect(
@@ -76,24 +92,35 @@ class DbLoader(object):
                     line_n=rect_data['line'][1],  # Intercept
                     line_theta=rect_data['line'][2]  # Theta
                 )
-            if 'point' in data:
-                for point_id in data['point']:
-                    point_data: dict = data['point'][point_id]
-                    Point(
-                        point_id=int(point_id),
-                        wall_id=int(point_data['wallID']),
-                        floor=self.__floor[point_data['floorID']],
-                        x=point_data['x'],
-                        y=point_data['y'],
-                        topo=int(point_data['topo'])
-                    )
-            for slab_id in data['slab']:
+            for point_id in data.get('point', {}):
+                point_data: dict = data['point'][point_id]
+                Point(
+                    point_id=int(point_id),
+                    wall_id=int(point_data['wallID']),
+                    floor=self.__floor[point_data['floorID']],
+                    x=point_data['x'],
+                    y=point_data['y'],
+                    topo=int(point_data['topo'])
+                )
+            for slab_id in data.get('slab', {}):
                 slab_data: dict = data['slab'][slab_id]
                 Slab(
                     slab_id=int(slab_id),
                     floor=self.__floor[slab_data['floorID']],
                     x=slab_data['x'],
                     y=slab_data['y']
+                )
+            for room_id in data.get('room', {}):
+                room_data: dict = data['room'][room_id]
+                room_cat = int(room_data['category'])
+                Room(
+                    room_id=int(room_id),
+                    floor=self.__floor[room_data['floorID']],
+                    x=room_data['x'],
+                    y=room_data['y'],
+                    color=room_categories[room_cat][1] if room_cat in room_categories else '#000000',
+                    category=room_cat,
+                    category_name=room_categories[room_cat][0] if room_cat in room_categories else ''
                 )
 
     def __getitem__(self, item: int) -> 'Floor':
@@ -133,14 +160,14 @@ class DbLoader(object):
         """
         Tabulates each floor, with their file and number of rects.
 
-        :param limit: Limit the number of items
+        :param limit: Limits the number of items
         :param show_project_id: Show project ID (if exists)
         """
         assert isinstance(limit, int) and limit >= 0, 'Limit must be an integer greater or equal than zero'
         theads = ['#']
         if show_project_id:
             theads.append('Project ID')
-        for t in ('Floor ID', 'No. rects', 'No. points', 'No. slabs', 'Floor image path'):
+        for t in ('Floor ID', 'Cat', 'Elev', 'Rects', 'Points', 'Slabs', 'Rooms', 'Floor image path'):
             theads.append(t)
         table = [theads]
         floors = self.floors
@@ -149,7 +176,9 @@ class DbLoader(object):
             table_data = [j]
             if show_project_id:
                 table_data.append(f.project_id)
-            for i in (f.id, len(f.rect), len(f.point), len(f.slab), f.image_path):
+            for i in (f.id, f.category, 1 if f.elevation else 0,
+                      len(f.rect), len(f.point), len(f.slab), len(f.room),  # Item count
+                      f.image_path):
                 table_data.append(i)
             table.append(table_data)
             if 0 < limit - 1 <= j:

@@ -1,7 +1,7 @@
 """
 MLSTRUCTFP - DB - CFLOOR
 
-Floor component, container of slabs and rectangles.
+Floor component, container of objects.
 """
 
 __all__ = ['Floor']
@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
     from MLStructFP.db._c_point import Point
     from MLStructFP.db._c_slab import Slab
+    from MLStructFP.db._c_room import Room
 
 
 class Floor(object):
@@ -29,12 +30,17 @@ class Floor(object):
     _rect: Dict[int, 'Rect']  # id => rect
     _point: Dict[int, 'Point']  # id => point
     _slab: Dict[int, 'Slab']  # id => slab
+    _room: Dict[int, 'Room']  # id => room
+    category: int
+    category_name: str
+    elevation: bool
     id: int
     image_path: str
     image_scale: float
     project_id: int
 
-    def __init__(self, floor_id: int, image_path: str, image_scale: NumberType, project_id: int = -1) -> None:
+    def __init__(self, floor_id: int, image_path: str, image_scale: NumberType, project_id: int,
+                 category: int = 0, category_name: str = '', elevation: bool = False) -> None:
         """
         Constructor.
 
@@ -42,19 +48,28 @@ class Floor(object):
         :param image_path: Image path
         :param image_scale: Image scale (px to units)
         :param project_id: Project ID (default: -1)
+        :param category: Project category
+        :param category_name: Project category name
+        :param elevation: Elevation mode
         """
         assert isinstance(floor_id, int) and floor_id > 0
         assert os.path.isfile(image_path), f'Image file {image_path} does not exist'
         assert isinstance(image_scale, NumberInstance) and image_scale > 0
+        assert isinstance(elevation, bool)
+        self.category = category
+        self.category_name = category_name
+        self.elevation = elevation
         self.id = floor_id
         self.image_path = image_path.replace('\\', '/')
         self.image_scale = float(image_scale)
         self.project_id = project_id
         self._bb = None
         self._last_mutation = None
+        # Object containers
         self._rect = {}
         self._point = {}
         self._slab = {}
+        self._room = {}
 
     @property
     def rect(self) -> Tuple['Rect', ...]:
@@ -71,6 +86,11 @@ class Floor(object):
         # noinspection PyTypeChecker
         return tuple(self._slab.values())
 
+    @property
+    def room(self) -> Tuple['Room', ...]:
+        # noinspection PyTypeChecker
+        return tuple(self._room.values())
+
     def plot_basic(self) -> 'go.Figure':
         """
         Plot basic objects.
@@ -85,6 +105,8 @@ class Floor(object):
             draw_rect: bool = True,
             draw_point: bool = True,
             draw_slab: bool = True,
+            draw_room: bool = True,
+            draw_item: bool = True,
             **kwargs
     ) -> 'go.Figure':
         """
@@ -94,27 +116,36 @@ class Floor(object):
         :param draw_rect: Draw wall rects
         :param draw_point: Draw points
         :param draw_slab: Draw slabs
+        :param draw_room: Draw rooms
+        :param draw_item: Draw items
         :param kwargs: Optional keyword arguments
         """
         fig = go.Figure()
 
         if draw_slab:
-            for s in self.slab:
-                s.plot_plotly(
+            for o in self.slab:
+                o.plot_plotly(
+                    fig=fig,
+                    fill=fill,
+                    **kwargs
+                )
+        if draw_room:
+            for o in self.room:
+                o.plot_plotly(
                     fig=fig,
                     fill=fill,
                     **kwargs
                 )
         if draw_rect:
-            for r in self.rect:
-                r.plot_plotly(
+            for o in self.rect:
+                o.plot_plotly(
                     fig=fig,
                     fill=fill,
                     **kwargs
                 )
         if draw_point:
-            for p in self.point:
-                p.plot_plotly(
+            for o in self.point:
+                o.plot_plotly(
                     fig=fig,
                     fill=fill,
                     **kwargs
@@ -169,7 +200,7 @@ class Floor(object):
         # Apply mutation
         rotation_center = GeomPoint2D()
         o: Tuple['BaseComponent']
-        for o in (self.rect, self.point, self.slab):
+        for o in (self.rect, self.point, self.slab, self.room):
             for c in o:
                 for p in c.points:
                     if not scale_first:

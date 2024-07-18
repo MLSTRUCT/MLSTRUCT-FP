@@ -4,6 +4,8 @@ MLSTRUCTFP - DB - CSLAB
 Slab component.
 """
 
+__all__ = ['Slab']
+
 from MLStructFP.db._c import BasePolyObj
 from MLStructFP._types import List, TYPE_CHECKING
 
