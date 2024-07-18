@@ -172,12 +172,14 @@ class DbLoader(object):
         self.__filter = f_filter
         self.__filtered_floors.clear()
 
-    def tabulate(self, limit: int = 0, show_project_id: bool = False) -> None:
+    def tabulate(self, limit: int = 0, show_project_id: bool = False,
+                 f_filter: Optional[Callable[['Floor'], bool]] = None) -> None:
         """
         Tabulates each floor, with their file and number of rects.
 
         :param limit: Limits the number of items
         :param show_project_id: Show project ID (if exists)
+        :param f_filter: Floor filter
         """
         assert isinstance(limit, int) and limit >= 0, 'Limit must be an integer greater or equal than zero'
         theads = ['#']
@@ -189,12 +191,14 @@ class DbLoader(object):
         floors = self.floors
         for j in range(len(floors)):
             f: 'Floor' = floors[j]
+            if f_filter is not None and not f_filter(f):
+                continue
             table_data = [j]
             if show_project_id:
                 table_data.append(f.project_id)
             for i in (f.id, f.category, 1 if f.elevation else 0,
                       len(f.rect), len(f.point), len(f.slab), len(f.room), len(f.item),  # Item count
-                      f.image_path):
+                      os.path.basename(f.image_path)):
                 table_data.append(i)
             table.append(table_data)
             if 0 < limit - 1 <= j:

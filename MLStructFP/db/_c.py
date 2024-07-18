@@ -209,6 +209,6 @@ class BasePolyObj(BasePolyComponent, abc.ABC):
             linewidth: NumberType = 2.0,
             alpha: NumberType = 1.0,
             color: str = '',
-            fill: bool = False
+            fill: bool = True
     ) -> None:
         super().plot_matplotlib(ax, linewidth, alpha, self.__color if color == '' else color, fill)
