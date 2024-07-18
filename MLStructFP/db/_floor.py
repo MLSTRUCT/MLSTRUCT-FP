@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from MLStructFP.db._c_point import Point
     from MLStructFP.db._c_slab import Slab
     from MLStructFP.db._c_room import Room
+    from MLStructFP.db._c_item import Item
 
 
 class Floor(object):
@@ -31,6 +32,7 @@ class Floor(object):
     _point: Dict[int, 'Point']  # id => point
     _slab: Dict[int, 'Slab']  # id => slab
     _room: Dict[int, 'Room']  # id => room
+    _item: Dict[int, 'Item']  # id => item
     category: int
     category_name: str
     elevation: bool
@@ -70,6 +72,7 @@ class Floor(object):
         self._point = {}
         self._slab = {}
         self._room = {}
+        self._item = {}
 
     @property
     def rect(self) -> Tuple['Rect', ...]:
@@ -90,6 +93,11 @@ class Floor(object):
     def room(self) -> Tuple['Room', ...]:
         # noinspection PyTypeChecker
         return tuple(self._room.values())
+
+    @property
+    def item(self) -> Tuple['Item', ...]:
+        # noinspection PyTypeChecker
+        return tuple(self._item.values())
 
     def plot_basic(self) -> 'go.Figure':
         """
@@ -123,29 +131,36 @@ class Floor(object):
         fig = go.Figure()
 
         if draw_slab:
-            for o in self.slab:
-                o.plot_plotly(
+            for s in self.slab:
+                s.plot_plotly(
                     fig=fig,
                     fill=fill,
                     **kwargs
                 )
         if draw_room:
-            for o in self.room:
-                o.plot_plotly(
+            for r in self.room:
+                r.plot_plotly(
+                    fig=fig,
+                    fill=fill,
+                    **kwargs
+                )
+        if draw_item:
+            for i in self.item:
+                i.plot_plotly(
                     fig=fig,
                     fill=fill,
                     **kwargs
                 )
         if draw_rect:
-            for o in self.rect:
-                o.plot_plotly(
+            for wr in self.rect:
+                wr.plot_plotly(
                     fig=fig,
                     fill=fill,
                     **kwargs
                 )
         if draw_point:
-            for o in self.point:
-                o.plot_plotly(
+            for wp in self.point:
+                wp.plot_plotly(
                     fig=fig,
                     fill=fill,
                     **kwargs
@@ -200,7 +215,7 @@ class Floor(object):
         # Apply mutation
         rotation_center = GeomPoint2D()
         o: Tuple['BaseComponent']
-        for o in (self.rect, self.point, self.slab, self.room):
+        for o in (self.rect, self.point, self.slab, self.room, self.item):
             for c in o:
                 for p in c.points:
                     if not scale_first:

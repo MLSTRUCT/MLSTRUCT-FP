@@ -11,6 +11,7 @@ from MLStructFP.db._c_rect import Rect
 from MLStructFP.db._c_point import Point
 from MLStructFP.db._c_slab import Slab
 from MLStructFP.db._c_room import Room
+from MLStructFP.db._c_item import Item
 from MLStructFP._types import Tuple
 
 import json
@@ -57,7 +58,10 @@ class DbLoader(object):
             for cat in (meta['room_categories'] if 'room_categories' in meta else {}):
                 rc = meta['room_categories'][cat]
                 room_categories[rc[0]] = (cat, rc[1])
-            print(room_categories)
+            item_types: Dict[int, Tuple[str, str]] = {}
+            for cat in (meta['item_types'] if 'item_types' in meta else {}):
+                ic = meta['item_types'][cat]
+                item_types[ic[0]] = (cat, ic[1])
 
             # Load floors
             for f_id in data.get('floor', {}):
@@ -122,6 +126,18 @@ class DbLoader(object):
                     category=room_cat,
                     category_name=room_categories[room_cat][0] if room_cat in room_categories else ''
                 )
+            for item_id in data.get('item', {}):
+                item_data: dict = data['item'][item_id]
+                item_cat = int(item_data['category'])
+                Item(
+                    item_id=int(item_id),
+                    floor=self.__floor[item_data['floorID']],
+                    x=item_data['x'],
+                    y=item_data['y'],
+                    color=item_types[item_cat][1] if item_cat in item_types else '#000000',
+                    category=item_cat,
+                    category_name=item_types[item_cat][0] if item_cat in item_types else ''
+                )
 
     def __getitem__(self, item: int) -> 'Floor':
         return self.__floor[item]
@@ -167,7 +183,7 @@ class DbLoader(object):
         theads = ['#']
         if show_project_id:
             theads.append('Project ID')
-        for t in ('Floor ID', 'Cat', 'Elev', 'Rects', 'Points', 'Slabs', 'Rooms', 'Floor image path'):
+        for t in ('Floor ID', 'Cat', 'Elev', 'Rects', 'Points', 'Slabs', 'Rooms', 'Items', 'Floor image path'):
             theads.append(t)
         table = [theads]
         floors = self.floors
@@ -177,7 +193,7 @@ class DbLoader(object):
             if show_project_id:
                 table_data.append(f.project_id)
             for i in (f.id, f.category, 1 if f.elevation else 0,
-                      len(f.rect), len(f.point), len(f.slab), len(f.room),  # Item count
+                      len(f.rect), len(f.point), len(f.slab), len(f.room), len(f.item),  # Item count
                       f.image_path):
                 table_data.append(i)
             table.append(table_data)
