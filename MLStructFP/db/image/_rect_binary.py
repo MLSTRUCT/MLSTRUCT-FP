@@ -91,11 +91,9 @@ class RectBinaryImage(BaseImage):
         if floor_id in self._plot.keys():
             return self._plot[floor_id]
 
-        fig: 'Figure'
-        ax: 'plt.Axes'
-        fig = plt.figure(frameon=False)  # Don't configure dpi
+        fig: 'Figure' = plt.figure(frameon=False)  # Don't configure dpi
         plt.style.use('default')  # Don't modify this either
-        ax = fig.add_axes([0, 0, 1, 1])
+        ax: 'plt.Axes' = fig.add_axes([0, 0, 1, 1])
         ax.axis('off')
         ax.set_aspect(aspect='equal')
         ax.grid(False)  # Don't enable as this may destroy the figures
@@ -178,7 +176,7 @@ class RectBinaryImage(BaseImage):
         plt.figure(fig.number)
 
         # Save the figure
-        figname = f'{rect.id}' if rect else f'{floor.id}-x-{xmin:.2f}-{xmax:.2f}-y-{ymin:.2f}-{ymax:.2f}'
+        figname: str = f'{rect.id}' if rect else f'{floor.id}-x-{xmin:.2f}-{xmax:.2f}-y-{ymin:.2f}-{ymax:.2f}'
 
         ax.set_xlim(min(xmin, xmax), max(xmin, xmax))
         ax.set_ylim(min(ymin, ymax), max(ymin, ymax))
