@@ -36,6 +36,12 @@ INITIAL_BACKEND = matplotlib.get_backend()
 class RectBinaryImage(BaseImage):
     """
     Rect binary image.
+
+    This class creates a segmentation mask iterating all rects from a given  floor;
+    obviously, this can be further extended to create other maps,  for example, for
+    wall joints (points), or can be concatenated to create multiple mask tensor for
+    a given crop  (like wall segments + joints). It is up to your  imagination  and
+    technical abilities =). I'd say that this is the most  important class  of all.
     """
     _crop_px: int
     _initial_backend: str
@@ -53,7 +59,7 @@ class RectBinaryImage(BaseImage):
 
         :param path: Image path
         :param save_images: Save images on path
-        :param image_size_px: Image size (width/height), bigger images are expensive, double the width, quad the size
+        :param image_size_px: Image size (width/height), bigger images are expensive; double the width, quad the size
         """
         BaseImage.__init__(self, path, save_images, image_size_px)
         self._crop_px = int(math.ceil(self._image_size / 32))  # Must be greater or equal than zero
@@ -82,7 +88,6 @@ class RectBinaryImage(BaseImage):
         :return: Figure of the floor
         """
         floor_id = str(floor.id)
-
         if floor_id in self._plot.keys():
             return self._plot[floor_id]
 
@@ -138,7 +143,7 @@ class RectBinaryImage(BaseImage):
         :param im: Image
         :return: Converted image
         """
-        return im.convert('P', palette=Image.ADAPTIVE)
+        return im.convert('P', palette=Image.Palette.ADAPTIVE)
 
     # noinspection PyMethodMayBeStatic
     def _post_process(self, im: 'Image.Image') -> 'Image.Image':
@@ -200,7 +205,6 @@ class RectBinaryImage(BaseImage):
             assert self._path != '', 'Path cannot be empty'
             filesave = os.path.join(self._path, figname + '.png')
             im4.save(make_dirs(filesave), format='PNG')
-            # print('Rect {0} saved to {1}'.format(rect.id, filesave))
 
         # noinspection PyTypeChecker
         array = np.array(im4, dtype=TYPE_IMAGE)

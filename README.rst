@@ -38,7 +38,8 @@ scaling.
 The images can be generated from the real rasterized plan, or by using the polygons stored in the
 JSON file. Both image and wall polygons are consistent in their placement.
 
-See more information in our `published article <https://doi.org/10.1016/j.autcon.2023.105132>`_.
+See more information in our `published article <https://doi.org/10.1016/j.autcon.2023.105132>`_; also,
+check out the `AI segmentation model <https://github.com/MLSTRUCT/MLSTRUCT-FP_benchmarks>`_ that tests this dataset.
 
 
 First steps

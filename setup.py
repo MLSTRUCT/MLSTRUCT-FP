@@ -19,7 +19,7 @@ requirements = [
     'numpy >= 1.18.5',
     'opencv-python <= 4.5.3.56',
     'Pillow >= 10.4.0',
-    'plotly >= 5.22.0',
+    'plotly >= 5.23.0',
     'requests >= 2.32.3',
     'tabulate >= 0.9.0'
 ]
