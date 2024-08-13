@@ -28,6 +28,7 @@ class BaseImage(ABC):
     """
     _image_size: int
     _images: List['np.ndarray']  # List of stored images during make_region
+    _last_make_region_time: float  # Total time for last make region
     _names: List[str]
     _path: str
     _save_images: bool
@@ -97,6 +98,10 @@ class BaseImage(ABC):
         :return: Returns the image index and matrix
         """
         raise NotImplementedError()
+
+    @property
+    def make_region_last_time(self) -> float:
+        return self._last_make_region_time
 
     def export(self, filename: str, close: bool = True, compressed: bool = True) -> None:
         """

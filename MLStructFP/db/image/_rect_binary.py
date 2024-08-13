@@ -17,6 +17,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import time
 
 if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
@@ -74,7 +75,7 @@ class RectBinaryImage(BaseImage):
         """
         plt.switch_backend('agg')
         self._initialized = True
-        self.close()
+        self.close(restore_plot=False)
         self._initialized = True
         return self
 
@@ -168,6 +169,7 @@ class RectBinaryImage(BaseImage):
         """
         if not self._initialized:
             raise RuntimeError('Exporter not initialized, use .init()')
+        t0 = time.time()
         store_matplotlib_figure = not HIGHLIGHT_RECT
         fig, ax = self._get_floor_plot(floor, rect, store=store_matplotlib_figure)
 
@@ -226,12 +228,15 @@ class RectBinaryImage(BaseImage):
         del im, im2, im3, im4, fig, ax
 
         # Returns the image index on the library array
+        self._last_make_region_time = time.time() - t0
         return len(self._images) - 1, array
 
-    def close(self) -> None:
+    def close(self, restore_plot: bool = True) -> None:
         """
         Close and delete all generated figures.
         This function also restores plot engine.
+
+        :param restore_plot: Restores plotting engine
         """
         if not self._initialized:
             raise RuntimeError('Exporter not initialized, it cannot be closed')
@@ -247,7 +252,7 @@ class RectBinaryImage(BaseImage):
         self._names.clear()
 
         # Restore plot
-        if plt.get_backend() == 'agg':
+        if restore_plot and plt.get_backend() == 'agg':
             plt.switch_backend(INITIAL_BACKEND)
 
         self._initialized = False

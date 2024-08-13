@@ -381,9 +381,12 @@ class RectFloorPhoto(BaseImage):
         :return: Returns the image index on the library array
         """
         assert xmax > xmin and ymax > ymin
+        t0 = time.time()
         dx = (xmax - xmin) / 2
         dy = (ymax - ymin) / 2
-        return self._make(floor, GeomPoint2D(xmin + dx, ymin + dy), dx, dy, rect)
+        mk = self._make(floor, GeomPoint2D(xmin + dx, ymin + dy), dx, dy, rect)
+        self._last_make_region_time = time.time() - t0
+        return mk
 
     def _make(self, floor: 'Floor', cr: 'GeomPoint2D', dx: float, dy: float, rect: Optional['Rect']
               ) -> Tuple[int, 'np.ndarray']:
