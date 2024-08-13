@@ -132,4 +132,3 @@ class DbLoaderTest(unittest.TestCase):
         # Now exporters must be closed
         self.assertEqual(len(image_binary.get_images()), 0)
         self.assertEqual(len(image_photo.get_images()), 0)
-        image_binary.restore_plot()

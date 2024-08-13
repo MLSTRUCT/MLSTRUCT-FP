@@ -231,6 +231,7 @@ class RectBinaryImage(BaseImage):
     def close(self) -> None:
         """
         Close and delete all generated figures.
+        This function also restores plot engine.
         """
         if not self._initialized:
             raise RuntimeError('Exporter not initialized, it cannot be closed')
@@ -245,12 +246,8 @@ class RectBinaryImage(BaseImage):
         self._images.clear()
         self._names.clear()
 
-        self._initialized = False
-
-    @staticmethod
-    def restore_plot() -> None:
-        """
-        Restore plot backend.
-        """
+        # Restore plot
         if plt.get_backend() == 'agg':
             plt.switch_backend(INITIAL_BACKEND)
+
+        self._initialized = False

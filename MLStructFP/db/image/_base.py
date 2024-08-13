@@ -13,6 +13,8 @@ import math
 import numpy as np
 import os
 
+from abc import ABC, abstractmethod
+
 if TYPE_CHECKING:
     from MLStructFP.db._c_rect import Rect
     from MLStructFP.db._floor import Floor
@@ -20,15 +22,17 @@ if TYPE_CHECKING:
 TYPE_IMAGE: str = 'uint8'
 
 
-class BaseImage(object):
+class BaseImage(ABC):
     """
     Base dataset image object.
     """
     _image_size: int
-    _images: List['np.ndarray']
+    _images: List['np.ndarray']  # List of stored images during make_region
     _names: List[str]
     _path: str
     _save_images: bool
+
+    patches: List['np.ndarray']  # Additional stored images
     save: bool
 
     def __init__(self, path: str, save_images: bool, image_size_px: int) -> None:
@@ -46,18 +50,28 @@ class BaseImage(object):
             make_dirs(path)
             assert os.path.isdir(path), f'Path <{path}> does not exist'
 
+        super(ABC, self).__init__()
         self._image_size = image_size_px
         self._images = []
         self._names = []  # List of image names
         self._path = path
         self._save_images = save_images  # Caution, this can be file expensive
 
+        self.patches = []
         self.save = True
 
     @property
     def image_shape(self) -> Tuple[int, int]:
         return self._image_size, self._image_size
 
+    @abstractmethod
+    def close(self) -> None:
+        """
+        Close and delete all generated figures.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
     def make_rect(self, rect: 'Rect', crop_length: NumberType) -> Tuple[int, 'np.ndarray']:
         """
         Generate image for the perimeter of a given rectangle.
@@ -68,6 +82,7 @@ class BaseImage(object):
         """
         raise NotImplementedError()
 
+    @abstractmethod
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
                     floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
         """
@@ -105,12 +120,6 @@ class BaseImage(object):
         imnames.close()
         if close:
             self.close()
-
-    def close(self) -> None:
-        """
-        Close and delete all generated figures.
-        """
-        raise NotImplementedError()
 
     def get_images(self) -> 'np.ndarray':
         """
