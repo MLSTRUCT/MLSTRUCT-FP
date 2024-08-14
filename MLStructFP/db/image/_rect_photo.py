@@ -368,7 +368,7 @@ class RectFloorPhoto(BaseImage):
         return self._make(rect.floor, rect.get_mass_center(), crop_length, crop_length, rect)
 
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
-                    floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
+                    floor: 'Floor') -> Tuple[int, 'np.ndarray']:
         """
         Generate image for a given region.
 
@@ -377,21 +377,20 @@ class RectFloorPhoto(BaseImage):
         :param ymin: Minimum y-axis (image coordinates)
         :param ymax: Maximum y-axis (image coordinates)
         :param floor: Floor object
-        :param rect: Optional rect for debug
         :return: Returns the image index on the library array
         """
         assert xmax > xmin and ymax > ymin
         t0 = time.time()
         dx = (xmax - xmin) / 2
         dy = (ymax - ymin) / 2
-        mk = self._make(floor, GeomPoint2D(xmin + dx, ymin + dy), dx, dy, rect)
+        mk = self._make(floor, GeomPoint2D(xmin + dx, ymin + dy), dx, dy, None)
         self._last_make_region_time = time.time() - t0
         return mk
 
     def _make(self, floor: 'Floor', cr: 'GeomPoint2D', dx: float, dy: float, rect: Optional['Rect']
               ) -> Tuple[int, 'np.ndarray']:
         """
-        Generate image for a given coordinate (x, y).
+        Generate image from a given coordinate (x, y).
 
         :param floor: Object floor to process
         :param cr: Coordinate to process

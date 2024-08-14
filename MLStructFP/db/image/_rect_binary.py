@@ -8,7 +8,7 @@ __all__ = ['RectBinaryImage']
 
 from MLStructFP.db.image._base import BaseImage, TYPE_IMAGE
 from MLStructFP.utils import make_dirs
-from MLStructFP._types import TYPE_CHECKING, Tuple, Dict, Optional, NumberType
+from MLStructFP._types import TYPE_CHECKING, Tuple, Dict, NumberType
 
 from PIL import Image
 import io
@@ -25,13 +25,10 @@ if TYPE_CHECKING:
     from MLStructFP.utils import GeomPoint2D
     from matplotlib.figure import Figure
 
-HIGHLIGHT_RECT = False
-HIGHLIGHT_RECT_COLOR = '#FF0000'
-MAX_STORED_FLOORS = 2
-RECT_COLOR = '#000000'
-
-assert HIGHLIGHT_RECT_COLOR != HIGHLIGHT_RECT, 'Highlight color must be different'
-INITIAL_BACKEND = matplotlib.get_backend()
+# Internal plot settings
+INITIAL_BACKEND: str = matplotlib.get_backend()
+MAX_STORED_FLOORS: int = 2
+PLOT_BACKEND: str = 'agg'
 
 
 class RectBinaryImage(BaseImage):
@@ -73,18 +70,18 @@ class RectBinaryImage(BaseImage):
 
         :return: Self
         """
-        plt.switch_backend('agg')
+        if plt.get_backend() != PLOT_BACKEND:
+            plt.switch_backend(PLOT_BACKEND)
         self._initialized = True
         self.close(restore_plot=False)
         self._initialized = True
         return self
 
-    def _get_floor_plot(self, floor: 'Floor', rect: Optional['Rect'], store: bool) -> Tuple['Figure', 'plt.Axes']:
+    def _get_floor_plot(self, floor: 'Floor', store: bool) -> Tuple['Figure', 'plt.Axes']:
         """
         Get basic figure of wall rects.
 
         :param floor: Source floor
-        :param rect: Optional rect
         :param store: Store cache of the floor
         :return: Figure of the floor
         """
@@ -102,7 +99,7 @@ class RectBinaryImage(BaseImage):
         for r in floor.rect:
             r.plot_matplotlib(
                 ax=ax,
-                color=RECT_COLOR if (rect and rect.id != r.id or not HIGHLIGHT_RECT) else HIGHLIGHT_RECT_COLOR
+                color='#000000'
             )
 
         # Save
@@ -131,7 +128,7 @@ class RectBinaryImage(BaseImage):
             xmax=cr.x + crop_length,
             ymin=cr.y - crop_length,
             ymax=cr.y + crop_length,
-            floor=rect.floor, rect=rect
+            floor=rect.floor
         )
 
     # noinspection PyMethodMayBeStatic
@@ -154,8 +151,38 @@ class RectBinaryImage(BaseImage):
         """
         return im
 
+    def _make(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
+              floor: 'Floor') -> 'Image.Image':
+        """
+        Generate image from a given coordinate (x, y).
+
+        :param xmin: Minimum x-axis (m)
+        :param xmax: Maximum x-axis (m)
+        :param ymin: Minimum y-axis (m)
+        :param ymax: Maximum y-axis (m)
+        :param floor: Floor object
+        :return: Returns the image
+        """
+        fig, ax = self._get_floor_plot(floor, store=True)
+
+        # Set the current figure
+        # noinspection PyUnresolvedReferences
+        plt.figure(fig.number)
+
+        # Extent axes
+        ax.set_xlim(min(xmin, xmax), max(xmin, xmax))
+        ax.set_ylim(min(ymin, ymax), max(ymin, ymax))
+
+        # Convert from matplotlib
+        ram = io.BytesIO()
+        plt.savefig(ram, format='png', dpi=100, bbox_inches='tight', transparent=False)
+        ram.seek(0)
+        im = Image.open(ram).convert('RGB')
+        ram.close()
+        return im
+
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
-                    floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
+                    floor: 'Floor') -> Tuple[int, 'np.ndarray']:
         """
         Generate image for a given region.
 
@@ -164,33 +191,17 @@ class RectBinaryImage(BaseImage):
         :param ymin: Minimum y-axis (m)
         :param ymax: Maximum y-axis (m)
         :param floor: Floor object
-        :param rect: Optional rect for debug
         :return: Returns the image index and matrix
         """
         if not self._initialized:
             raise RuntimeError('Exporter not initialized, use .init()')
         t0 = time.time()
-        store_matplotlib_figure = not HIGHLIGHT_RECT
-        fig, ax = self._get_floor_plot(floor, rect, store=store_matplotlib_figure)
 
-        # Set the current figure
-        # noinspection PyUnresolvedReferences
-        plt.figure(fig.number)
-
-        # Save the figure
-        figname: str = f'{rect.id}' if rect else f'{floor.id}-x-{xmin:.2f}-{xmax:.2f}-y-{ymin:.2f}-{ymax:.2f}'
-
-        ax.set_xlim(min(xmin, xmax), max(xmin, xmax))
-        ax.set_ylim(min(ymin, ymax), max(ymin, ymax))
-
-        # Convert from matplotlib
-        ram = io.BytesIO()
-        plt.savefig(ram, format='png', dpi=100, bbox_inches='tight', transparent=False)
-        ram.seek(0)
-        im: 'Image.Image' = Image.open(ram)
+        # Make crop
+        im: 'Image.Image' = self._make(xmin, xmax, ymin, ymax, floor)
 
         # Convert color
-        im2: 'Image.Image' = self._convert_image_color(im.convert('RGB'))
+        im2: 'Image.Image' = self._convert_image_color(im)
 
         # Resize
         s_resize = self._image_size + 2 * self._crop_px
@@ -201,6 +212,7 @@ class RectBinaryImage(BaseImage):
         im4: 'Image.Image' = self._post_process(im3.crop((self._crop_px, self._crop_px, s_crop, s_crop)))
 
         # Save to file
+        figname: str = f'{floor.id}-x-{xmin:.2f}-{xmax:.2f}-y-{ymin:.2f}-{ymax:.2f}'
         if self._save_images:
             assert self._path != '', 'Path cannot be empty'
             filesave = os.path.join(self._path, figname + '.png')
@@ -215,17 +227,13 @@ class RectBinaryImage(BaseImage):
             self._names.append(figname)
 
         # Close data
-        ram.close()
         im.close()
         im2.close()
         im3.close()
         im4.close()
 
-        if not store_matplotlib_figure:
-            plt.close(fig)
-
         # Remove data
-        del im, im2, im3, im4, fig, ax
+        del im, im2, im3, im4
 
         # Returns the image index on the library array
         self._last_make_region_time = time.time() - t0
@@ -252,7 +260,7 @@ class RectBinaryImage(BaseImage):
         self._names.clear()
 
         # Restore plot
-        if restore_plot and plt.get_backend() == 'agg':
+        if restore_plot and plt.get_backend() == PLOT_BACKEND:
             plt.switch_backend(INITIAL_BACKEND)
 
         self._initialized = False

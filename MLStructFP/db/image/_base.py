@@ -85,7 +85,7 @@ class BaseImage(ABC):
 
     @abstractmethod
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
-                    floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
+                    floor: 'Floor') -> Tuple[int, 'np.ndarray']:
         """
         Generate image for a given region.
 
@@ -94,7 +94,6 @@ class BaseImage(ABC):
         :param ymin: Minimum y-axis (m)
         :param ymax: Maximum y-axis (m)
         :param floor: Floor object
-        :param rect: Optional rect for debug
         :return: Returns the image index and matrix
         """
         raise NotImplementedError()
