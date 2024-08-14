@@ -6,7 +6,7 @@ Image of the surroundings of a rect.
 
 __all__ = ['BaseImage', 'TYPE_IMAGE']
 
-from MLStructFP._types import TYPE_CHECKING, List, NumberType, Optional, Tuple
+from MLStructFP._types import TYPE_CHECKING, List, NumberType, Tuple
 from MLStructFP.utils import make_dirs
 
 import math
@@ -51,7 +51,7 @@ class BaseImage(ABC):
             make_dirs(path)
             assert os.path.isdir(path), f'Path <{path}> does not exist'
 
-        super(ABC, self).__init__()
+        super().__init__()
         self._image_size = image_size_px
         self._images = []
         self._names = []  # List of image names
@@ -66,7 +66,7 @@ class BaseImage(ABC):
         return self._image_size, self._image_size
 
     @abstractmethod
-    def close(self) -> None:
+    def close(self, *args, **kwargs) -> None:
         """
         Close and delete all generated figures.
         """
