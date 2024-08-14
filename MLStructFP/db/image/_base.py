@@ -141,3 +141,9 @@ class BaseImage(ABC):
         if filename not in self._names:
             raise ValueError(f'File <{filename}> have not been processed yet')
         return self._names.index(filename)
+
+    def init(self) -> 'BaseImage':
+        """
+        Init the object.
+        """
+        return self
