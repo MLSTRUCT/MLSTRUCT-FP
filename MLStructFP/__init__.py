@@ -7,9 +7,9 @@ Machine learning structural floor plan dataset.
 # Basic information
 __author__ = 'Pablo Pizarro R.'
 __description__ = 'Machine learning structural floor plan dataset'
-__keywords__ = ['ml', 'ai', 'floor-plan', 'architectural', 'dataset', 'cnn']
+__keywords__ = ['ml', 'ai', 'floor plan', 'architectural', 'dataset', 'cnn']
 __email__ = 'pablo@ppizarror.com'
-__version__ = '0.6.4'
+__version__ = '0.6.5'
 
 # URL
 __url__ = 'https://github.com/MLSTRUCT/MLSTRUCT-FP'

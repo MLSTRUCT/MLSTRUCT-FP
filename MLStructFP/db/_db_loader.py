@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - DBLOADER
+MLSTRUCT-FP - DB - DBLOADER
 
 Loads a given dataset .json file.
 """
@@ -54,14 +54,17 @@ class DbLoader(object):
             floor_categories: Dict[int, str] = {}
             for cat in (meta['floor_categories'] if 'floor_categories' in meta else {}):
                 floor_categories[meta['floor_categories'][cat]] = cat
-            room_categories: Dict[int, Tuple[str, str]] = {}
-            for cat in (meta['room_categories'] if 'room_categories' in meta else {}):
-                rc = meta['room_categories'][cat]
-                room_categories[rc[0]] = (cat, rc[1])
             item_types: Dict[int, Tuple[str, str]] = {}
             for cat in (meta['item_types'] if 'item_types' in meta else {}):
                 ic = meta['item_types'][cat]
                 item_types[ic[0]] = (cat, ic[1])
+            project_label: Dict[int, str] = {}
+            for pid in (meta['project_label'] if 'project_label' in meta else {}):
+                project_label[pid] = meta['project_label'][pid]
+            room_categories: Dict[int, Tuple[str, str]] = {}
+            for cat in (meta['room_categories'] if 'room_categories' in meta else {}):
+                rc = meta['room_categories'][cat]
+                room_categories[rc[0]] = (cat, rc[1])
 
             # Load floors
             for f_id in data.get('floor', {}):
@@ -172,19 +175,20 @@ class DbLoader(object):
         self.__filter = f_filter
         self.__filtered_floors.clear()
 
-    def tabulate(self, limit: int = 0, show_project_id: bool = False,
+    def tabulate(self, limit: int = 0, show_project: bool = False,
                  f_filter: Optional[Callable[['Floor'], bool]] = None) -> None:
         """
         Tabulates each floor, with their file and number of rects.
 
         :param limit: Limits the number of items
-        :param show_project_id: Show project ID (if exists)
+        :param show_project: Show project data (if exists)
         :param f_filter: Floor filter
         """
         assert isinstance(limit, int) and limit >= 0, 'Limit must be an integer greater or equal than zero'
         theads = ['#']
-        if show_project_id:
+        if show_project:
             theads.append('Project ID')
+            theads.append('Project label')
         for t in ('Floor ID', 'Cat', 'Elev', 'Rects', 'Points', 'Slabs', 'Rooms', 'Items', 'Floor image path'):
             theads.append(t)
         table = [theads]
@@ -194,8 +198,9 @@ class DbLoader(object):
             if f_filter is not None and not f_filter(f):
                 continue
             table_data = [j]
-            if show_project_id:
+            if show_project:
                 table_data.append(f.project_id)
+                table_data.append(f.project_label)
             for i in (f.id, f.category, 1 if f.elevation else 0,
                       len(f.rect), len(f.point), len(f.slab), len(f.room), len(f.item),  # Item count
                       os.path.basename(f.image_path)):
