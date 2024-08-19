@@ -190,7 +190,7 @@ class DbLoader(object):
                 ('Project ID', 'Project label', 'Floor ID', 'Cat', 'Elev',
                  'Rects', 'Points', 'Slabs', 'Rooms', 'Items', 'Floor image path'
                  ) if not legacy else
-                ('Floor ID', 'Rects', 'Floor image path')
+                ('Floor ID', 'Rects', 'Slabs', 'Floor image path')
         ):
             theads.append(t)
         table = [theads]
@@ -205,7 +205,7 @@ class DbLoader(object):
                     (f.project_id, f.project_label, f.id, f.category, 1 if f.elevation else 0,
                      len(f.rect), len(f.point), len(f.slab), len(f.room), len(f.item), f_file
                      ) if not legacy else
-                    (f.id, len(f.rect), f_file)
+                    (f.id, len(f.rect), len(f.slab), f_file)
             ):
                 table_data.append(i)
             table.append(table_data)
