@@ -60,7 +60,10 @@ class DbLoader(object):
                 item_types[ic[0]] = (cat, ic[1])
             project_label: Dict[int, str] = {}
             for pid in (meta['project_label'] if 'project_label' in meta else {}):
-                project_label[pid] = meta['project_label'][pid]
+                try:
+                    project_label[int(pid)] = meta['project_label'][pid]
+                except ValueError:
+                    pass
             room_categories: Dict[int, Tuple[str, str]] = {}
             for cat in (meta['room_categories'] if 'room_categories' in meta else {}):
                 rc = meta['room_categories'][cat]
@@ -69,12 +72,14 @@ class DbLoader(object):
             # Load floors
             for f_id in data.get('floor', {}):
                 f_data: dict = data['floor'][f_id]
-                f_cat = int(f_data['category'] if 'category' in f_data else 0)
+                f_cat: int = int(f_data['category'] if 'category' in f_data else 0)
+                project_id: int = f_data['project'] if 'project' in f_data else -1
                 self.__floor[int(f_id)] = Floor(
                     floor_id=int(f_id),
                     image_path=os.path.join(self.__path, f_data['image']),
                     image_scale=f_data['scale'],
-                    project_id=f_data['project'] if 'project' in f_data else -1,
+                    project_id=project_id,
+                    project_label=project_label[project_id] if project_id in project_label else '',
                     category=f_cat,
                     category_name=floor_categories.get(f_cat, ''),
                     elevation=f_data['elevation'] if 'elevation' in f_data else False
