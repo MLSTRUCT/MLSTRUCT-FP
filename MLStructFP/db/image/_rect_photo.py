@@ -579,7 +579,7 @@ class RectFloorPhoto(BaseImage):
 
         return image_kernel
 
-    def close(self) -> None:
+    def close(self, **kwargs) -> None:
         """
         Close and delete all generated figures.
         """

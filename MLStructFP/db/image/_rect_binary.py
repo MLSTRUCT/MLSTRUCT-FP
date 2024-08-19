@@ -4,7 +4,7 @@ MLSTRUCT-FP - DB - IMAGE - RECT BINARY
 Image of the surroundings of a rect.
 """
 
-__all__ = ['RectBinaryImage']
+__all__ = ['RectBinaryImage', 'restore_plot_backend']
 
 from MLStructFP.db.image._base import BaseImage, TYPE_IMAGE
 from MLStructFP.utils import make_dirs
@@ -29,6 +29,14 @@ if TYPE_CHECKING:
 INITIAL_BACKEND: str = matplotlib.get_backend()
 MAX_STORED_FLOORS: int = 2
 PLOT_BACKEND: str = 'agg'
+
+
+def restore_plot_backend() -> None:
+    """
+    Restores plot backend.
+    """
+    if plt.get_backend() == PLOT_BACKEND:
+        plt.switch_backend(INITIAL_BACKEND)
 
 
 class RectBinaryImage(BaseImage):
@@ -260,7 +268,7 @@ class RectBinaryImage(BaseImage):
         self._names.clear()
 
         # Restore plot
-        if restore_plot and plt.get_backend() == PLOT_BACKEND:
-            plt.switch_backend(INITIAL_BACKEND)
+        if restore_plot:
+            restore_plot_backend()
 
         self._initialized = False
