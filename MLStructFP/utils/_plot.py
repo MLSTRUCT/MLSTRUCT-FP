@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - UTILS - PLOT
+MLSTRUCT-FP - UTILS - PLOT
 
 Plotting utils.
 """

@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - IMAGE - BASE
+MLSTRUCT-FP - DB - IMAGE - BASE
 
 Image of the surroundings of a rect.
 """

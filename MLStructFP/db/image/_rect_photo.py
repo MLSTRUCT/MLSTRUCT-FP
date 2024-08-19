@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - IMAGE - RECT PHOTO
+MLSTRUCT-FP - DB - IMAGE - RECT PHOTO
 
 Image of the true rect photo from the base image plan.
 """

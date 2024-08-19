@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - IMAGE
+MLSTRUCT-FP - DB - IMAGE
 
 Dataset image operations.
 """

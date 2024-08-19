@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - CSLAB
+MLSTRUCT-FP - DB - CSLAB
 
 Slab component.
 """

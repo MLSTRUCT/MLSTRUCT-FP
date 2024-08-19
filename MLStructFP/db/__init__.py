@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB
+MLSTRUCT-FP - DB
 
 Dataset load and objects.
 """

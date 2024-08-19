@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - CRECT
+MLSTRUCT-FP - DB - CRECT
 
 Rectangle component.
 """

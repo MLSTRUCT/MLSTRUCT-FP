@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - UTILS - PATH
+MLSTRUCT-FP - UTILS - PATH
 
 Path utils.
 """

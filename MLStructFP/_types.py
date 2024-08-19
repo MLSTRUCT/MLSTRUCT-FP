@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - TYPES
+MLSTRUCT-FP - TYPES
 
 Define globals types used by the code.
 """

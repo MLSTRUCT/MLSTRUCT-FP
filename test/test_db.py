@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - TEST - DB
+MLSTRUCT-FP - TEST - DB
 
 Test the dataset loader and object components.
 """

@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - C
+MLSTRUCT-FP - DB - C
 
 Base FP components.
 """

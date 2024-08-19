@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - SETUP
+MLSTRUCT-FP - SETUP
 
 Setup distribution.
 """

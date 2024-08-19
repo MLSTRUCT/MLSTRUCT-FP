@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - BUILD
+MLSTRUCT-FP - BUILD
 
 Build file.
 """

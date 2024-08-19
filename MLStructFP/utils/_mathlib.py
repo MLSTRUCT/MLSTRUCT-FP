@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - UTILS - MATH
+MLSTRUCT-FP - UTILS - MATH
 
 Math utils.
 """

@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - LINE 2D
+MLSTRUCT-FP - DB - LINE 2D
 
 Line definition class.
 """

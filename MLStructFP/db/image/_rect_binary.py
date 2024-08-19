@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - IMAGE - RECT BINARY
+MLSTRUCT-FP - DB - IMAGE - RECT BINARY
 
 Image of the surroundings of a rect.
 """

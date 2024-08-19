@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - CITEM
+MLSTRUCT-FP - DB - CITEM
 
 Item component.
 """

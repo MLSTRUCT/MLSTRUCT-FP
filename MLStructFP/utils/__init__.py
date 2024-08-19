@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - UTILS
+MLSTRUCT-FP - UTILS
 
 Utils (math, plots).
 """

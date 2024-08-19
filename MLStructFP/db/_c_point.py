@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - CPOINT
+MLSTRUCT-FP - DB - CPOINT
 
 Point component.
 """

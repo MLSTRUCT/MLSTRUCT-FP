@@ -1,5 +1,5 @@
 """
-MLSTRUCTFP - DB - CROOM
+MLSTRUCT-FP - DB - CROOM
 
 Room component.
 """
