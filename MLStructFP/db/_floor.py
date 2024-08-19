@@ -42,7 +42,7 @@ class Floor(object):
     project_id: int
     project_label: str
 
-    def __init__(self, floor_id: int, image_path: str, image_scale: NumberType, project_id: int = -1,
+    def __init__(self, floor_id: int, image_path: str, image_scale: NumberType, project_id: int,
                  project_label: str = '', category: int = 0, category_name: str = '', elevation: bool = False) -> None:
         """
         Constructor.
@@ -50,7 +50,7 @@ class Floor(object):
         :param floor_id: Floor ID
         :param image_path: Image path
         :param image_scale: Image scale (px to units)
-        :param project_id: Project ID (default: -1)
+        :param project_id: Project ID
         :param project_label: Project label (default empty)
         :param category: Project category
         :param category_name: Project category name

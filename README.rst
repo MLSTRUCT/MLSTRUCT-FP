@@ -23,7 +23,7 @@ MLSTRUCT-FP
     :target: https://opensource.org/licenses/MIT
     :alt: License MIT
 
-Multi-unit floor plan dataset.
+**M**\ achine **L**\ earning **STRUCT**\ ural **F**\ loor **P**\ lan: A multi-unit floor plan dataset.
 
 
 Description
@@ -31,11 +31,11 @@ Description
 
 This repo contains the base library to load and parse floor plans from the MLSTRUCT-FP dataset, which
 contains over 954 large-scale floor plan images, alongside annotations for their walls in JSON
-format. The database loader just loads in memory the Floor, Walls, and Slab objects, and also
+format. The database loader loads in memory the Floor, Walls, and Slab objects, and also
 offers methods to create custom images from floor plans by applying a crop, a rotation, and a custom
 scaling.
 
-The images can be generated from the real rasterized plan, or by using the polygons stored in the
+The images can be generated from the real rasterized plan or by using the polygons stored in the
 JSON file. Both image and wall polygons are consistent in their placement.
 
 See more information in our `published article <https://doi.org/10.1016/j.autcon.2023.105132>`_; also,
@@ -45,13 +45,13 @@ check out the `AI segmentation model <https://github.com/MLSTRUCT/MLSTRUCT-FP_be
 First steps
 -----------
 
-In order to install the library, use the following python-pip commands:
+To install the library, use the following python-pip commands:
 
 .. code-block:: bash
 
     python -m pip install MLStructFP
 
-To download the dataset (compressed in .zip), request a public download link by completing a 
+To download the dataset (compressed in .zip), request a public download link by completing a
 `simple form <https://forms.gle/HigdGxngnTEvnNC37>`_.
 
 
@@ -61,7 +61,7 @@ Dataset details
 The dataset (uncompressed) has the following structure:
 
 .. code-block:: bash
-    
+
     dataset/
         0a0...736.png
         0a7...b41.png
@@ -77,7 +77,7 @@ whose labels (wall polygons, slabs) and metadata are stored within fp.json.
 The format of the fp.json file is characterized as follows:
 
 .. code-block:: JSON
-    
+
     {
         "rect": {
             "1000393": {
@@ -134,7 +134,7 @@ The format of the fp.json file is characterized as follows:
     }
 
 Note the dataset comprises a list of "rect" representing the rectangles (wall segments),
-"slab" and "floor". Each item has a distinct ID for querying and grouping elements. In the example,
+"slab," and "floor." Each item has a distinct ID for querying and grouping elements. In the example,
 the rect ID ``1000393`` is within floor ID ``8970646``, with an angle of ``0`` degrees, a length
 of ``2.6 m``, and within the wall ID ``5969311``. Likewise, the slab ``1002588`` is within floor
 ID ``5980221``, whose its first point (x, y) is ``(-1.153, -22.622) m``. Finally, the floor ID
@@ -145,15 +145,15 @@ there are ``70873`` rects, ``954`` slabs and ``954`` floors.
 Object API
 ----------
 
-The basic usage of the API is illustrated on the
-`jupyter notebook <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/example.ipynb>`_. The most basic
+The primary usage of the API is illustrated on the
+`jupyter notebook <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/example.ipynb>`_. The most fundamental
 object is `DbLoader <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/MLStructFP/db/_db_loader.py>`_,
 which receives the path of the ``fp.json`` file.
 
 .. code-block:: python
-    
+
     class DbLoader(db: str)
-    
+
     # Example
     db = DbLoader('test/data/fp.json')
     db.tabulate()
@@ -165,21 +165,21 @@ which receives the path of the ``fp.json`` file.
 DbLoader creates a dict of `Floor <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/MLStructFP/db/_floor.py>`_ object,
 which each contains a dict of `Rect <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/MLStructFP/db/_c_rect.py>`_ and
 `Slab <https://github.com/MLSTRUCT/MLSTRUCT-FP/blob/master/MLStructFP/db/_c_slab.py>`_ objects. Each item is associated
-using their respective ids. Floor objects also have many methods to retrieve their elements, plot, and apply
-transformations (aka mutations) such as scaling or rotation using ``mutate()`` method:
+with their respective IDs. Floor objects also have many methods to retrieve their elements, plot, and apply
+transformations (aka mutations) such as scaling or rotation using the ``mutate()`` method:
 
 .. code-block:: python
-    
+
     class Floor:
         ...
-        
+
         def mutate(self, angle: NumberType = 0, sx: NumberType = 1, sy: NumberType = 1,
                 scale_first: bool = True) -> 'Floor':
             ...
-    
+
     # Example
     plot_floor = db.floor[302]
-    plot_floor.mutate(30, 1, 1)  # 30 degrees, scale 1 on the x-axis, 1 on the y-axis
+    plot_floor.mutate(30, 1, 1)  # 30 degrees, scale one on the x-axis, one on the y-axis
     plot_floor.plot_complex()
 
 .. image:: docs/example-plot.png
@@ -193,19 +193,19 @@ main responsibilities are creating plan crops for machine learning model trainin
 and downsampling on any image size and scale factor. For both objects, the main methods are:
 
 .. code-block:: python
-    
+
     def make_rect(self, rect: 'Rect', crop_length: NumberType = 5) -> Tuple[int, 'np.ndarray']:
-    
+
     def make_region(self, xmin: NumberType, xmax: NumberType, ymin: NumberType, ymax: NumberType,
                     floor: 'Floor', rect: Optional['Rect'] = None) -> Tuple[int, 'np.ndarray']:
 
-The first one creates a crop around the provided rect (using its position as the center, adding ``crop_length`` m
+The first creates a crop around the provided rect (using its position as the center, adding ``crop_length`` m
 for each axis). The second one creates a region on any arbitrary ``(xmin, ymin, xmax, ymax)`` region. Consider
 each position in meters.
 
 From the provided notebook example, the following image shows two crops generated using a mutated floor plan
-with 30 30-degree angle rotation. Crops are ``256x256 px`` size and display a ``10x10 m`` region, for a selected
-rectangle as origin.
+with 30 30-degree angle rotation. Crops are 256x256 px`` in size and display a ``10x10 m`` region for a selected
+rectangle as the origin.
 
 .. image:: docs/example-rects.png
   :width: 640

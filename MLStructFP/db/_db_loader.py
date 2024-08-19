@@ -175,21 +175,23 @@ class DbLoader(object):
         self.__filter = f_filter
         self.__filtered_floors.clear()
 
-    def tabulate(self, limit: int = 0, show_project: bool = False,
+    def tabulate(self, limit: int = 0, legacy: bool = False,
                  f_filter: Optional[Callable[['Floor'], bool]] = None) -> None:
         """
         Tabulates each floor, with their file and number of rects.
 
         :param limit: Limits the number of items
-        :param show_project: Show project data (if exists)
+        :param legacy: Show legacy mode
         :param f_filter: Floor filter
         """
         assert isinstance(limit, int) and limit >= 0, 'Limit must be an integer greater or equal than zero'
         theads = ['#']
-        if show_project:
-            theads.append('Project ID')
-            theads.append('Project label')
-        for t in ('Floor ID', 'Cat', 'Elev', 'Rects', 'Points', 'Slabs', 'Rooms', 'Items', 'Floor image path'):
+        for t in (
+                ('Project ID', 'Project label', 'Floor ID', 'Cat', 'Elev',
+                 'Rects', 'Points', 'Slabs', 'Rooms', 'Items', 'Floor image path'
+                 ) if not legacy else
+                ('Floor ID', 'Rects', 'Floor image path')
+        ):
             theads.append(t)
         table = [theads]
         floors = self.floors
@@ -198,12 +200,13 @@ class DbLoader(object):
             if f_filter is not None and not f_filter(f):
                 continue
             table_data = [j]
-            if show_project:
-                table_data.append(f.project_id)
-                table_data.append(f.project_label)
-            for i in (f.id, f.category, 1 if f.elevation else 0,
-                      len(f.rect), len(f.point), len(f.slab), len(f.room), len(f.item),  # Item count
-                      os.path.basename(f.image_path)):
+            f_file: str = os.path.basename(f.image_path)
+            for i in (
+                    (f.project_id, f.project_label, f.id, f.category, 1 if f.elevation else 0,
+                     len(f.rect), len(f.point), len(f.slab), len(f.room), len(f.item), f_file
+                     ) if not legacy else
+                    (f.id, len(f.rect), f_file)
+            ):
                 table_data.append(i)
             table.append(table_data)
             if 0 < limit - 1 <= j:
