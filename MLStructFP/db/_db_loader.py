@@ -16,9 +16,11 @@ from MLStructFP._types import Tuple
 
 import json
 import math
+import matplotlib.pyplot as plt
 import os
 import tabulate
 
+from collections import Counter
 from IPython.display import HTML, display
 from pathlib import Path
 from typing import Dict, Callable, Optional, List
@@ -175,7 +177,7 @@ class DbLoader(object):
         """
         Set floor filter.
 
-        :param f_filter: Floor filter
+        :param f_filter: Floor filter. If "None", it is removed
         """
         self.__filter = f_filter
         self.__filtered_floors.clear()
@@ -223,3 +225,44 @@ class DbLoader(object):
             stralign='center',
             tablefmt='html'
         )))
+
+    def hist(self,
+             f_hist: Callable[['Floor'], List[str]] = lambda f: [f.category_name],
+             f_filter: Optional[Callable[['Floor'], bool]] = None,
+             sort_cat: bool = True,
+             show_plot: bool = True
+             ) -> Tuple[str, ...]:
+        """
+        Create an histogram of object categories.
+
+        :param f_hist: Function that feeds histogram with object categories
+        :param f_filter: Floor filter
+        :param sort_cat: Sort object categories
+        :param show_plot: Show plot
+        :return: All categories, considering sort
+        """
+        cat: List[str] = []
+        for f in self.floors:
+            if f_filter is not None and not f_filter(f):
+                continue
+            fh = f_hist(f)
+            assert isinstance(fh, list), f'f_hist must return a list of categories to assemble histogram, "{fh}" is not allowed'
+            for c in fh:
+                assert isinstance(c, str), f'f_hist must return only strings, "{c}" is not allowed'
+                cat.append(c)
+        category_counts = Counter(cat)
+        if sort_cat:  # Sort categories
+            categories, counts = zip(*sorted(category_counts.items(), key=lambda x: x[1], reverse=True))
+        else:
+            categories, counts = list(category_counts.keys()), list(category_counts.values())
+        lc = len(categories)
+        plt.figure(figsize=(12, 6))
+        plt.bar(categories, counts)
+        plt.xticks(rotation=45, fontsize=8 if lc > 10 else 10, ha='right')
+        plt.xlabel('Category')
+        plt.ylabel('Frequency')
+        plt.title(f'Histogram ({lc} categories / {len(cat)} objects)')
+        plt.tight_layout()
+        if show_plot:
+            plt.show()
+        return tuple(categories)

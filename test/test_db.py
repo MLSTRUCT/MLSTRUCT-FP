@@ -100,6 +100,13 @@ class DbLoaderTest(unittest.TestCase):
         f.mutate()
         test(83.1, -6.3)
 
+    def test_hist(self) -> None:
+        """
+        Test class histogram.
+        """
+        db = DbLoader(DB_PATH)
+        self.assertEqual(db.hist(show_plot=False), ('',))
+
     def test_image(self) -> None:
         """
         Test image obtain in binary/photo.
