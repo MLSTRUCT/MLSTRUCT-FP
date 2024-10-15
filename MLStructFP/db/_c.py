@@ -21,9 +21,9 @@ class BaseComponent(abc.ABC):
     """
     Floor plan base component.
     """
-    floor: 'Floor'
-    id: int
-    points: List['GeomPoint2D']
+    _floor: 'Floor'
+    _id: int
+    _points: List['GeomPoint2D']  # The coordinates of the object
 
     def __init__(
             self,
@@ -43,11 +43,23 @@ class BaseComponent(abc.ABC):
         assert isinstance(component_id, int) and component_id > 0
         assert isinstance(x, VectorInstance) and len(x) > 0
         assert isinstance(y, VectorInstance) and len(y) == len(x)
-        self.id = component_id
-        self.floor = floor
-        self.points = []
+        self._floor = floor
+        self._id = component_id
+        self._points = []
         for i in range(len(x)):
-            self.points.append(GeomPoint2D(float(x[i]), float(y[i])))
+            self._points.append(GeomPoint2D(float(x[i]), float(y[i])))
+
+    @property
+    def floor(self) -> 'Floor':
+        return self._floor
+
+    @property
+    def id(self) -> int:
+        return self._id
+
+    @property
+    def points(self) -> List['GeomPoint2D']:
+        return [p for p in self._points]
 
     def plot_plotly(self, *args, **kwargs) -> None:
         """
@@ -75,7 +87,7 @@ class BasePolyComponent(BaseComponent, abc.ABC):
         :param dx: X displacement
         :param dy: Y displacement
         """
-        px, py = [p.x for p in self.points], [p.y for p in self.points]
+        px, py = [p.x for p in self._points], [p.y for p in self._points]
         for i in range(len(px)):  # Adds displacement (dx, dy)
             px[i] += dx
             py[i] += dy
@@ -134,7 +146,7 @@ class BasePolyComponent(BaseComponent, abc.ABC):
         :param color: Plot color
         :param fill: Fill object
         """
-        px, py = [p.x for p in self.points], [p.y for p in self.points]
+        px, py = [p.x for p in self._points], [p.y for p in self._points]
         px.append(px[0])
         py.append(py[0])
         if fill:
@@ -149,8 +161,8 @@ class BasePolyObj(BasePolyComponent, abc.ABC):
     """
     __basename: str
     __color: str
-    category: int
-    category_name: str
+    _category: int
+    _category_name: str
 
     def __init__(
             self,
@@ -181,8 +193,16 @@ class BasePolyObj(BasePolyComponent, abc.ABC):
         ctx[obj_id] = self
         self.__basename = basename
         self.__color = color
-        self.category = category
-        self.category_name = category_name
+        self._category_name = category_name
+        self._category = category
+
+    @property
+    def category(self) -> int:
+        return self._category
+
+    @property
+    def category_name(self) -> str:
+        return self._category_name
 
     # noinspection PyUnusedLocal
     def plot_plotly(

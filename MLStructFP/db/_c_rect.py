@@ -78,7 +78,7 @@ class Rect(BaseComponent):
         """
         Returns the mass center of the rect.
         """
-        return GeomPoint2D(sum(p.x for p in self.points), sum(p.y for p in self.points)).scale(1 / len(self.points))
+        return GeomPoint2D(sum(p.x for p in self._points), sum(p.y for p in self._points)).scale(1 / len(self._points))
 
     def plot_plotly(
             self,
@@ -103,7 +103,7 @@ class Rect(BaseComponent):
         :param color: Color, if empty use default object color
         :param show_legend: Add object legend to plot
         """
-        px, py = [p.x for p in self.points], [p.y for p in self.points]
+        px, py = [p.x for p in self._points], [p.y for p in self._points]
         px.append(px[0])
         py.append(py[0])
         if color == '':
@@ -144,7 +144,7 @@ class Rect(BaseComponent):
         """
         if color == '':
             color = '#000000'
-        px, py = [p.x for p in self.points], [p.y for p in self.points]
+        px, py = [p.x for p in self._points], [p.y for p in self._points]
         if fill:
             ax.fill(px, py, color=color, lw=None, alpha=alpha)
         else:
