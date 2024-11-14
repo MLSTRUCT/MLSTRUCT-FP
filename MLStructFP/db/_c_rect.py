@@ -24,6 +24,7 @@ class Rect(BaseComponent):
     angle: float
     length: float
     line: GeomLine2D
+    partition: bool
     thickness: float
     wall: int
 
@@ -39,7 +40,8 @@ class Rect(BaseComponent):
             y: List[float],
             line_m: NumberType,
             line_n: NumberType,
-            line_theta: NumberType
+            line_theta: NumberType,
+            partition: bool
     ) -> None:
         """
         Constructor.
@@ -55,6 +57,7 @@ class Rect(BaseComponent):
         :param line_m: Line slope
         :param line_n: Line intercept
         :param line_theta: Line angle
+        :param partition: Rect is partition wall
         """
         BaseComponent.__init__(self, rect_id, x, y, floor)
         assert isinstance(wall_id, int) and wall_id > 0
@@ -63,12 +66,14 @@ class Rect(BaseComponent):
         assert isinstance(line_m, NumberInstance)
         assert isinstance(line_n, NumberInstance)
         assert isinstance(line_theta, NumberInstance)
+        assert isinstance(partition, bool)
         self.angle = float(angle)
         self.length = float(length)
         self.line = GeomLine2D()
         self.line.m = float(line_m)
         self.line.n = float(line_n)
         self.line.theta = float(line_theta)
+        self.partition = partition
         self.thickness = float(thickness)
         self.wall = wall_id
         # noinspection PyProtectedMember

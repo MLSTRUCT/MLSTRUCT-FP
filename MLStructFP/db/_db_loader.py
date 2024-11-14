@@ -104,7 +104,8 @@ class DbLoader(object):
                     y=rect_data['y'],
                     line_m=rect_data['line'][0],  # Slope
                     line_n=rect_data['line'][1],  # Intercept
-                    line_theta=rect_data['line'][2]  # Theta
+                    line_theta=rect_data['line'][2],  # Theta
+                    partition=rect_data['partition'] if 'partition' in rect_data else False  # Is partition
                 )
             for point_id in data.get('point', {}):
                 point_data: dict = data['point'][point_id]
@@ -246,7 +247,8 @@ class DbLoader(object):
             if f_filter is not None and not f_filter(f):
                 continue
             fh = f_hist(f)
-            assert isinstance(fh, list), f'f_hist must return a list of categories to assemble histogram, "{fh}" is not allowed'
+            assert isinstance(fh,
+                              list), f'f_hist must return a list of categories to assemble histogram, "{fh}" is not allowed'
             for c in fh:
                 assert isinstance(c, str), f'f_hist must return only strings, "{c}" is not allowed'
                 cat.append(c)
