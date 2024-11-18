@@ -1,7 +1,7 @@
 """
 MLSTRUCT-FP - DB - CPOINT
 
-Point component.
+Point component (wall joints).
 """
 
 __all__ = ['Point']

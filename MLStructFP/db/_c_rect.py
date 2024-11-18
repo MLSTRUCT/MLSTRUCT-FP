@@ -1,7 +1,7 @@
 """
 MLSTRUCT-FP - DB - CRECT
 
-Rectangle component.
+Rectangle component (wall segment).
 """
 
 __all__ = ['Rect']

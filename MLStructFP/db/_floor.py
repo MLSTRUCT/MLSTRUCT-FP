@@ -42,8 +42,9 @@ class Floor(object):
     project_id: int
     project_label: str
 
-    def __init__(self, floor_id: int, image_path: str, image_scale: NumberType, project_id: int,
-                 project_label: str = '', category: int = 0, category_name: str = '', elevation: bool = False) -> None:
+    def __init__(self, floor_id: int, image_path: str, image_scale: NumberType,
+                 project_id: int, project_label: str = '', category: int = 0, category_name: str = '',
+                 elevation: bool = False) -> None:
         """
         Constructor.
 
