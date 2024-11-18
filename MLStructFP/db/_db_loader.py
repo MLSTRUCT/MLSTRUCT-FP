@@ -184,13 +184,15 @@ class DbLoader(object):
         self.__filtered_floors.clear()
 
     def tabulate(self, limit: int = 0, legacy: bool = False,
-                 f_filter: Optional[Callable[['Floor'], bool]] = None) -> None:
+                 f_filter: Optional[Callable[['Floor'], bool]] = None,
+                 category_name: bool = False) -> None:
         """
         Tabulates each floor, with their file and number of rects.
 
         :param limit: Limits the number of items
         :param legacy: Show legacy mode
         :param f_filter: Floor filter
+        :param category_name: If true, shows category name instead of numeric value
         """
         assert isinstance(limit, int) and limit >= 0, 'Limit must be an integer greater or equal than zero'
         theads = ['#']
@@ -210,8 +212,9 @@ class DbLoader(object):
             table_data = [j]
             f_file: str = os.path.basename(f.image_path)
             for i in (
-                    (f.project_id, f.project_label, f.id, f.category, 1 if f.elevation else 0,
-                     len(f.rect), len(f.point), len(f.slab), len(f.room), len(f.item), f_file
+                    (f.project_id, f.project_label, f.id, f.category if not category_name else f.category_name,
+                     1 if f.elevation else 0, len(f.rect), len(f.point), len(f.slab),
+                     len(f.room), len(f.item), f_file
                      ) if not legacy else
                     (f.id, len(f.rect), len(f.slab), f_file)
             ):
@@ -247,8 +250,8 @@ class DbLoader(object):
             if f_filter is not None and not f_filter(f):
                 continue
             fh = f_hist(f)
-            assert isinstance(fh,
-                              list), f'f_hist must return a list of categories to assemble histogram, "{fh}" is not allowed'
+            assert isinstance(fh, list), (f'f_hist must return a list of categories to assemble histogram, '
+                                          f'"{fh}" is not allowed')
             for c in fh:
                 assert isinstance(c, str), f'f_hist must return only strings, "{c}" is not allowed'
                 cat.append(c)
