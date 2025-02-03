@@ -46,7 +46,7 @@ setup(
         'test': ['nose2[coverage_plugin]', 'pytest']
     },
     keywords=MLStructFP.__keywords__,
-    name='MLStructFP',
+    name='mlstructfp',
     packages=find_packages(exclude=[
         '.idea',
         '.ipynb_checkpoints',
