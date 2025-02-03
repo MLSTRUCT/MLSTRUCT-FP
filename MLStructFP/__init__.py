@@ -10,7 +10,7 @@ __description__ = 'Machine learning structural floor plan dataset'
 __email__ = 'pablo@ppizarror.com'
 __keywords__ = ['ml', 'ai', 'floor plan', 'architectural', 'dataset', 'cnn']
 __license__ = 'MIT'
-__version__ = '0.7.2'
+__version__ = '0.7.3'
 
 # URL
 __url__ = 'https://github.com/MLSTRUCT/MLSTRUCT-FP'

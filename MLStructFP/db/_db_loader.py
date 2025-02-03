@@ -33,6 +33,7 @@ class DbLoader(object):
     __filter: Optional[Callable[['Floor'], bool]]
     __filtered_floors: List['Floor']
     __floor: Dict[int, 'Floor']
+    __floor_categories: Dict[int, str]
     __path: str
 
     def __init__(self, db: str, floor_only: bool = False) -> None:
@@ -45,17 +46,17 @@ class DbLoader(object):
         assert os.path.isfile(db), f'Dataset file {db} not found'
         self.__filter = None
         self.__filtered_floors = []
-        self.__path = str(Path(os.path.realpath(db)).parent)
         self.__floor = {}
+        self.__floor_categories: Dict[int, str] = {}
+        self.__path = str(Path(os.path.realpath(db)).parent)
 
         with open(db, 'r', encoding='utf8') as dbfile:
             data: dict = json.load(dbfile)
             meta: dict = data['meta'] if 'meta' in data else {}
 
             # Load metadata
-            floor_categories: Dict[int, str] = {}
             for cat in (meta['floor_categories'] if 'floor_categories' in meta else {}):
-                floor_categories[meta['floor_categories'][cat]] = cat
+                self.__floor_categories[meta['floor_categories'][cat]] = cat
             item_types: Dict[int, Tuple[str, str]] = {}
             for cat in (meta['item_types'] if 'item_types' in meta else {}):
                 ic = meta['item_types'][cat]
@@ -83,7 +84,7 @@ class DbLoader(object):
                     project_id=project_id,
                     project_label=project_label[project_id] if project_id in project_label else '',
                     category=f_cat,
-                    category_name=floor_categories.get(f_cat, ''),
+                    category_name=self.__floor_categories.get(f_cat, ''),
                     elevation=f_data['elevation'] if 'elevation' in f_data else False
                 )
             if floor_only:
@@ -152,6 +153,31 @@ class DbLoader(object):
 
     def __getitem__(self, item: int) -> 'Floor':
         return self.__floor[item]
+
+    def add_floor(self, floor_image: str, scale: float, category: int, elevation: bool) -> 'Floor':
+        """
+        Adds a floor to the dataset. No project.
+
+        :param floor_image: Floor image file
+        :param scale: Image scale
+        :param category: Floor category
+        :param elevation: Floor is elevation
+        :return: Added floor object
+        """
+        assert os.path.isfile(floor_image)
+        f_id: int = len(self.__floor) + 1
+        f = Floor(
+            floor_id=int(f_id),
+            image_path=floor_image,
+            image_scale=scale,
+            project_id=-1,
+            project_label='',
+            category=category,
+            category_name=self.__floor_categories.get(category, ''),
+            elevation=elevation
+        )
+        self.__floor[f_id] = f
+        return f
 
     @property
     def floors(self) -> Tuple['Floor', ...]:

@@ -107,6 +107,18 @@ class DbLoaderTest(unittest.TestCase):
         db = DbLoader(DB_PATH)
         self.assertEqual(db.hist(show_plot=False), ('',))
 
+    def test_add_floor(self) -> None:
+        """
+        Test add floor to database.
+        """
+        db = DbLoader(DB_PATH)
+        f0 = db.floors[0]
+        f = db.add_floor(floor_image=f0.image_path, scale=f0.image_scale, category=f0.category, elevation=f0.elevation)
+        self.assertEqual(f.image_path, f0.image_path)
+        self.assertEqual(f.image_scale, f0.image_scale)
+        self.assertEqual(f.category, f0.category)
+        self.assertEqual(f.elevation, f0.elevation)
+
     def test_image(self) -> None:
         """
         Test image obtain in binary/photo.
