@@ -28,6 +28,7 @@ jobs:
       python-version: 3.8
 
   codeql:
+    needs: test
     uses: ppizarror/workflow-actions/.github/workflows/codeql.yml@master
     with:
       language: python
