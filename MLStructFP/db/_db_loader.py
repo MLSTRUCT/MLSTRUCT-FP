@@ -245,7 +245,7 @@ class DbLoader(object):
                     (f.id, len(f.rect), len(f.slab), f_file)
             ):
                 table_data.append(i)
-            table.append(table_data)
+            table.append(table_data)  # type: ignore
             if 0 < limit - 1 <= j:
                 break
         display(HTML(tabulate.tabulate(
