@@ -1,6 +1,6 @@
 [run]
 omit =
-    */config-*.py
+    */config*.py
 
 [report]
 exclude_lines =
